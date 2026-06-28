@@ -1,0 +1,171 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import StatusBadge from "@/components/StatusBadge";
+import type { BookingWithDetails } from "@/lib/types";
+
+export default function BookingDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const supabase = createClient();
+  const [booking, setBooking] = useState<BookingWithDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const beforeInputRef = useRef<HTMLInputElement>(null);
+  const afterInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from("bookings")
+        .select("*, car:cars(*, villa:villas(*))")
+        .eq("id", id)
+        .single();
+      setBooking(data as unknown as BookingWithDetails);
+      setLoading(false);
+    }
+    load();
+  }, [id, supabase]);
+
+  async function uploadPhoto(file: File, kind: "before" | "after") {
+    setBusy(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("bookingId", id);
+    const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+    const uploadData = await uploadRes.json();
+
+    if (uploadData.url) {
+      const field = kind === "before" ? "before_photo_url" : "after_photo_url";
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: uploadData.url }),
+      });
+      const updated = await res.json();
+      setBooking(updated);
+    }
+    setBusy(false);
+  }
+
+  async function updateStatus(status: "in_progress" | "completed") {
+    setBusy(true);
+    const res = await fetch(`/api/bookings/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    const updated = await res.json();
+    setBooking(updated);
+    setBusy(false);
+  }
+
+  if (loading) {
+    return <div className="p-6 text-center text-gray-500">Loading...</div>;
+  }
+
+  if (!booking) {
+    return <div className="p-6 text-center text-gray-500">Booking not found.</div>;
+  }
+
+  return (
+    <div className="min-h-screen max-w-md mx-auto bg-gray-50 p-4 space-y-4">
+      <button onClick={() => router.back()} className="text-blue-600 font-medium">
+        ← Back
+      </button>
+
+      <div className="rounded-xl bg-white p-5 shadow-sm space-y-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold">Villa {booking.villa.villa_number}</h1>
+          <StatusBadge status={booking.status} />
+        </div>
+        <p className="text-gray-700">
+          {booking.car.color} {booking.car.make} {booking.car.model}
+        </p>
+        {booking.car.plate_number && (
+          <p className="text-gray-500 text-sm">Plate: {booking.car.plate_number}</p>
+        )}
+        <p className="text-gray-500 text-sm">{booking.scheduled_time_slot}</p>
+        <p className="text-gray-500 text-sm">Owner: {booking.villa.owner_name}</p>
+      </div>
+
+      <div className="rounded-xl bg-white p-5 shadow-sm space-y-3">
+        <h2 className="font-semibold">Before photo</h2>
+        {booking.before_photo_url ? (
+          <img src={booking.before_photo_url} alt="Before" className="rounded-lg w-full" />
+        ) : (
+          <p className="text-sm text-gray-400">No photo yet</p>
+        )}
+        <input
+          ref={beforeInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "before")}
+        />
+        <button
+          disabled={busy}
+          onClick={() => beforeInputRef.current?.click()}
+          className="w-full rounded-lg border-2 border-gray-300 py-3 font-semibold disabled:opacity-50"
+        >
+          Take Before Photo
+        </button>
+      </div>
+
+      {booking.status === "scheduled" && (
+        <button
+          disabled={busy}
+          onClick={() => updateStatus("in_progress")}
+          className="w-full rounded-lg bg-blue-600 py-4 text-lg font-bold text-white disabled:opacity-50"
+        >
+          Start Cleaning
+        </button>
+      )}
+
+      {booking.status === "in_progress" && (
+        <div className="rounded-xl bg-white p-5 shadow-sm space-y-3">
+          <h2 className="font-semibold">After photo</h2>
+          {booking.after_photo_url ? (
+            <img src={booking.after_photo_url} alt="After" className="rounded-lg w-full" />
+          ) : (
+            <p className="text-sm text-gray-400">No photo yet</p>
+          )}
+          <input
+            ref={afterInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "after")}
+          />
+          <button
+            disabled={busy}
+            onClick={() => afterInputRef.current?.click()}
+            className="w-full rounded-lg border-2 border-gray-300 py-3 font-semibold disabled:opacity-50"
+          >
+            Take After Photo
+          </button>
+        </div>
+      )}
+
+      {booking.status === "in_progress" && (
+        <button
+          disabled={busy || !booking.after_photo_url}
+          onClick={() => updateStatus("completed")}
+          className="w-full rounded-lg bg-green-600 py-4 text-lg font-bold text-white disabled:opacity-50"
+        >
+          Mark Completed
+        </button>
+      )}
+
+      {booking.status === "completed" && (
+        <p className="text-center text-green-600 font-semibold py-2">
+          ✅ Job completed and client notified
+        </p>
+      )}
+    </div>
+  );
+}
