@@ -37,6 +37,7 @@ export interface Employee {
   whatsapp_number: string | null;
   role: Role;
   community_ids: string[];
+  must_change_password: boolean;
   created_at: string;
 }
 
@@ -45,6 +46,10 @@ export interface ServiceSubscription {
   villa_id: string;
   frequency: SubscriptionFrequency;
   day_of_week: number | null;
+  next_clean_date: string | null;
+  weekdays: number[];
+  time_window_start: string | null;
+  time_window_end: string | null;
   price_per_clean: number;
   active: boolean;
   created_at: string;
@@ -54,6 +59,7 @@ export interface Booking {
   id: string;
   car_id: string;
   employee_id: string | null;
+  subscription_id: string | null;
   scheduled_date: string;
   scheduled_time_slot: string;
   status: BookingStatus;
@@ -72,9 +78,12 @@ export interface BookingWithDetails extends Booking {
 export interface Payment {
   id: string;
   villa_id: string;
+  employee_id: string | null;
+  subscription_id: string | null;
   amount: number;
   due_date: string;
   status: PaymentStatus;
   payment_method: string | null;
+  paid_at: string | null;
   created_at: string;
 }

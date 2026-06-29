@@ -13,9 +13,13 @@ export default async function Home() {
 
   const { data: employee } = await supabase
     .from("employees")
-    .select("role")
+    .select("role, must_change_password")
     .eq("auth_user_id", session.user.id)
     .single();
+
+  if (employee?.must_change_password) {
+    redirect("/set-password");
+  }
 
   redirect(employee?.role === "admin" ? "/admin" : "/cleaner");
 }

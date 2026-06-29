@@ -1,16 +1,11 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import EmployeeRow from "./EmployeeRow";
+import { localDateStr, startOfBusinessWeek } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
-
-function startOfWeek(date: Date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = (day + 6) % 7;
-  d.setDate(d.getDate() - diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
 
 export default async function EmployeesPage() {
   const supabase = createClient();
@@ -18,10 +13,14 @@ export default async function EmployeesPage() {
   if (!session) redirect("/login");
 
   const { data: employees } = await supabase.from("employees").select("*").order("name");
+  const { data: communities } = await supabase.from("communities").select("id, name").order("name");
 
-  const now = new Date();
-  const weekStart = startOfWeek(now).toISOString().slice(0, 10);
-  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const admin = createAdminClient();
+  const { data: authUsers } = await admin.auth.admin.listUsers();
+  const emailByAuthUserId = new Map((authUsers?.users ?? []).map((u) => [u.id, u.email ?? ""]));
+
+  const weekStart = localDateStr(startOfBusinessWeek());
+  const monthStart = `${localDateStr().slice(0, 7)}-01`;
 
   const { data: bookings } = await supabase
     .from("bookings")
@@ -36,22 +35,31 @@ export default async function EmployeesPage() {
   subs?.forEach((s) => priceByVilla.set(s.villa_id, Number(s.price_per_clean)));
 
   const { data: villas } = await supabase.from("villas").select("id, community_id");
-  const communityByVilla = new Map<string, string>();
-  villas?.forEach((v) => communityByVilla.set(v.id, v.community_id));
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Employees</h1>
-      <div className="overflow-x-auto rounded-xl bg-white border shadow-sm">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Employees</h1>
+        <Link
+          href="/admin/employees/new"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
+        >
+          + New Employee
+        </Link>
+      </div>
+      <div className="overflow-x-auto rounded-card bg-white border border-line">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-sm text-gray-500">
             <tr>
               <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Role</th>
               <th className="px-4 py-3">WhatsApp</th>
+              <th className="px-4 py-3">Communities</th>
               <th className="px-4 py-3">Cleaned this week</th>
               <th className="px-4 py-3">Cleaned this month</th>
               <th className="px-4 py-3">Book of business</th>
+              <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -72,14 +80,16 @@ export default async function EmployeesPage() {
               );
 
               return (
-                <tr key={emp.id}>
-                  <td className="px-4 py-3 font-medium">{emp.name}</td>
-                  <td className="px-4 py-3 capitalize">{emp.role}</td>
-                  <td className="px-4 py-3">{emp.whatsapp_number}</td>
-                  <td className="px-4 py-3">{weekCount}</td>
-                  <td className="px-4 py-3">{monthCount}</td>
-                  <td className="px-4 py-3">AED {bookOfBusiness.toLocaleString()}</td>
-                </tr>
+                <EmployeeRow
+                  key={emp.id}
+                  employee={emp}
+                  email={emp.auth_user_id ? emailByAuthUserId.get(emp.auth_user_id) ?? "" : ""}
+                  communities={communities ?? []}
+                  weekCount={weekCount}
+                  monthCount={monthCount}
+                  bookOfBusiness={bookOfBusiness}
+                  isSelf={emp.auth_user_id === session.user.id}
+                />
               );
             })}
           </tbody>

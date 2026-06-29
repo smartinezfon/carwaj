@@ -1,25 +1,21 @@
 import type { BookingStatus } from "@/lib/types";
 
-const STYLES: Record<BookingStatus, string> = {
-  scheduled: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  in_progress: "bg-blue-100 text-blue-800 border-blue-300",
-  completed: "bg-green-100 text-green-800 border-green-300",
-  cancelled: "bg-red-100 text-red-800 border-red-300",
-};
-
-const LABELS: Record<BookingStatus, string> = {
-  scheduled: "Scheduled",
-  in_progress: "In Progress",
-  completed: "Completed",
-  cancelled: "Cancelled",
+const META: Record<BookingStatus, { label: string; text: string; bg: string; dot: string }> = {
+  scheduled: { label: "Scheduled", text: "#b45309", bg: "#fff4e5", dot: "#f59e0b" },
+  in_progress: { label: "In progress", text: "#1d4ed8", bg: "#e8f0fe", dot: "#2563eb" },
+  completed: { label: "Completed", text: "#15803d", bg: "#e7f7ee", dot: "#16a34a" },
+  cancelled: { label: "Cancelled", text: "#b91c1c", bg: "#fdecec", dot: "#ef4444" },
 };
 
 export default function StatusBadge({ status }: { status: BookingStatus }) {
+  const m = META[status];
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold ${STYLES[status]}`}
+      className="inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-xs font-bold"
+      style={{ color: m.text, backgroundColor: m.bg }}
     >
-      {LABELS[status]}
+      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: m.dot }} />
+      {m.label}
     </span>
   );
 }

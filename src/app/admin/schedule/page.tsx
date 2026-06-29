@@ -1,28 +1,20 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import AssignEmployeeSelect from "./AssignEmployeeSelect";
+import { localDateStr, startOfBusinessWeek } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
-
-function startOfWeek(date: Date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = (day + 6) % 7;
-  d.setDate(d.getDate() - diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
 
 export default async function SchedulePage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect("/login");
 
-  const weekStart = startOfWeek(new Date());
+  const weekStart = startOfBusinessWeek();
   const days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(weekStart);
-    d.setDate(d.getDate() + i);
-    return d.toISOString().slice(0, 10);
+    const d = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);
+    return localDateStr(d);
   });
 
   const { data: bookings } = await supabase
@@ -40,12 +32,20 @@ export default async function SchedulePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Schedule (this week)</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Schedule (this week)</h1>
+        <Link
+          href="/admin/schedule/new"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
+        >
+          + New Job
+        </Link>
+      </div>
       <div className="grid grid-cols-7 gap-3">
         {days.map((day) => {
           const dayBookings = (bookings ?? []).filter((b) => b.scheduled_date === day);
           return (
-            <div key={day} className="rounded-xl bg-white border shadow-sm p-3 min-h-[200px]">
+            <div key={day} className="rounded-card bg-white border border-line p-3 min-h-[200px]">
               <p className="text-sm font-semibold text-gray-500 mb-2">
                 {new Date(day).toLocaleDateString(undefined, { weekday: "short", day: "numeric" })}
               </p>

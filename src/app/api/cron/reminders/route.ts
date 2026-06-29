@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWhatsAppMessage } from "@/lib/twilio";
+import { localDateStr, startOfBusinessDay } from "@/lib/date";
 
 // Trigger this daily (e.g. via Vercel Cron or pg_cron) to send:
 // 1. Day-before booking reminders
@@ -12,11 +13,10 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createAdminClient();
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().slice(0, 10);
-  const todayStr = today.toISOString().slice(0, 10);
+  const today = startOfBusinessDay();
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+  const tomorrowStr = localDateStr(tomorrow);
+  const todayStr = localDateStr(today);
 
   const { data: bookings } = await supabase
     .from("bookings")
