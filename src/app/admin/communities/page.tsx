@@ -2,9 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import CommunityCard from "./CommunityCard";
-
-export const dynamic = "force-dynamic";
-
 export default async function CommunitiesPage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();

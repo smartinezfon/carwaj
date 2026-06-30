@@ -3,9 +3,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import AssignEmployeeSelect from "./AssignEmployeeSelect";
 import { localDateStr, startOfBusinessWeek } from "@/lib/date";
-
-export const dynamic = "force-dynamic";
-
 export default async function SchedulePage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();

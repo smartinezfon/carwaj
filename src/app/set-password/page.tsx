@@ -1,9 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import SetPasswordForm from "./SetPasswordForm";
-
-export const dynamic = "force-dynamic";
-
 export default async function SetPasswordPage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();

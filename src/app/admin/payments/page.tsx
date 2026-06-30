@@ -1,9 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { localDateStr } from "@/lib/date";
-
-export const dynamic = "force-dynamic";
-
 function daysOverdue(dueDate: string, today: string): number {
   const due = new Date(`${dueDate}T00:00:00`);
   const now = new Date(`${today}T00:00:00`);

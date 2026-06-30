@@ -3,9 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import BookingCard from "@/components/BookingCard";
 import { localDateStr } from "@/lib/date";
 import type { BookingWithDetails } from "@/lib/types";
-
-export const dynamic = "force-dynamic";
-
 export default async function TodaySchedulePage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();

@@ -5,36 +5,38 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import EmployeeRow from "./EmployeeRow";
 import { localDateStr, startOfBusinessWeek } from "@/lib/date";
 
-export const dynamic = "force-dynamic";
-
 export default async function EmployeesPage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect("/login");
 
-  const { data: employees } = await supabase.from("employees").select("*").order("name");
-  const { data: communities } = await supabase.from("communities").select("id, name").order("name");
-
-  const admin = createAdminClient();
-  const { data: authUsers } = await admin.auth.admin.listUsers();
-  const emailByAuthUserId = new Map((authUsers?.users ?? []).map((u) => [u.id, u.email ?? ""]));
-
   const weekStart = localDateStr(startOfBusinessWeek());
   const monthStart = `${localDateStr().slice(0, 7)}-01`;
 
-  const { data: bookings } = await supabase
-    .from("bookings")
-    .select("employee_id, status, scheduled_date, car:cars(villa_id)")
-    .gte("scheduled_date", monthStart);
+  const admin = createAdminClient();
 
-  const { data: subs } = await supabase
-    .from("service_subscriptions")
-    .select("villa_id, price_per_clean")
-    .eq("active", true);
+  const [
+    { data: employees },
+    { data: communities },
+    { data: authUsers },
+    { data: bookings },
+    { data: subs },
+    { data: villas },
+  ] = await Promise.all([
+    supabase.from("employees").select("*").order("name"),
+    supabase.from("communities").select("id, name").order("name"),
+    admin.auth.admin.listUsers(),
+    supabase
+      .from("bookings")
+      .select("employee_id, status, scheduled_date, car:cars(villa_id)")
+      .gte("scheduled_date", monthStart),
+    supabase.from("service_subscriptions").select("villa_id, price_per_clean").eq("active", true),
+    supabase.from("villas").select("id, community_id"),
+  ]);
+
+  const emailByAuthUserId = new Map((authUsers?.users ?? []).map((u) => [u.id, u.email ?? ""]));
   const priceByVilla = new Map<string, number>();
   subs?.forEach((s) => priceByVilla.set(s.villa_id, Number(s.price_per_clean)));
-
-  const { data: villas } = await supabase.from("villas").select("id, community_id");
 
   return (
     <div>

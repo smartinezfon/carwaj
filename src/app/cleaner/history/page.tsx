@@ -1,8 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-
-export const dynamic = "force-dynamic";
-
 function timeliness(dueDate: string, paidAt: string): { label: string; days: number; tone: string } {
   const due = new Date(`${dueDate}T00:00:00`);
   const paidDateStr = new Date(paidAt).toISOString().slice(0, 10);

@@ -1,9 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import CalendarView from "./CalendarView";
-
-export const dynamic = "force-dynamic";
-
 export default async function CalendarPage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();

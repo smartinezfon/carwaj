@@ -3,8 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { localDateStr, startOfBusinessWeek } from "@/lib/date";
 import OverviewCards from "./OverviewCards";
 
-export const dynamic = "force-dynamic";
-
 export default async function AdminOverviewPage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
@@ -15,25 +13,29 @@ export default async function AdminOverviewPage() {
   const weekStart = localDateStr(weekStartDate);
   const weekEnd = localDateStr(new Date(weekStartDate.getTime() + 6 * 24 * 60 * 60 * 1000));
 
-  const [{ data: todayJobs }, { data: weekJobs }, { data: activeSubs }, { data: employees }] =
-    await Promise.all([
-      supabase.from("bookings").select("id, status").eq("scheduled_date", today),
-      supabase
-        .from("bookings")
-        .select("id, subscription_id, car:cars(villa:villas(community:communities(name)))")
-        .gte("scheduled_date", weekStart)
-        .lte("scheduled_date", weekEnd),
-      supabase
-        .from("service_subscriptions")
-        .select("id, price_per_clean, villa:villas(community:communities(name))")
-        .eq("active", true),
-      supabase.from("employees").select("id, name"),
-    ]);
-
-  const { data: subBookingLinks } = await supabase
-    .from("bookings")
-    .select("subscription_id, employee_id")
-    .not("subscription_id", "is", null);
+  const [
+    { data: todayJobs },
+    { data: weekJobs },
+    { data: activeSubs },
+    { data: employees },
+    { data: subBookingLinks },
+  ] = await Promise.all([
+    supabase.from("bookings").select("id, status").eq("scheduled_date", today),
+    supabase
+      .from("bookings")
+      .select("id, subscription_id, car:cars(villa:villas(community:communities(name)))")
+      .gte("scheduled_date", weekStart)
+      .lte("scheduled_date", weekEnd),
+    supabase
+      .from("service_subscriptions")
+      .select("id, price_per_clean, villa:villas(community:communities(name))")
+      .eq("active", true),
+    supabase.from("employees").select("id, name"),
+    supabase
+      .from("bookings")
+      .select("subscription_id, employee_id")
+      .not("subscription_id", "is", null),
+  ]);
 
   const jobsToday = todayJobs ?? [];
   const toWashToday = jobsToday.filter((j) => j.status === "scheduled" || j.status === "in_progress").length;

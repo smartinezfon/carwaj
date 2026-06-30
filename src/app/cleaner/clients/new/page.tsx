@@ -1,9 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import NewClientForm from "./NewClientForm";
-
-export const dynamic = "force-dynamic";
-
 export default async function NewClientPage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();

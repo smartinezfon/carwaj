@@ -1,9 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import SuperAdminSidebar from "@/components/SuperAdminSidebar";
-
-export const dynamic = "force-dynamic";
-
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();

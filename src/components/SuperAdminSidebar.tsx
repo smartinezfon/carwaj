@@ -30,6 +30,18 @@ const LINKS = [
     ),
   },
   {
+    href: "/superadmin/users",
+    label: "Users",
+    icon: (c: string) => (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <circle cx="9" cy="7" r="3" stroke={c} strokeWidth="1.8" />
+        <circle cx="17" cy="8" r="2.5" stroke={c} strokeWidth="1.8" />
+        <path d="M3 20c.5-3.5 3-5 6-5s5.5 1.5 6 5" stroke={c} strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M15 15c1.5-.3 3.5.5 4 3" stroke={c} strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     href: "/superadmin/profile",
     label: "My Profile",
     icon: (c: string) => (

@@ -3,9 +3,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ClientCard from "./ClientCard";
 import { localDateStr } from "@/lib/date";
-
-export const dynamic = "force-dynamic";
-
 export default async function ClientsPage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();

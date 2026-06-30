@@ -3,9 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import NewCompanyForm from "./NewCompanyForm";
 import EditCompanyForm from "./EditCompanyForm";
-
-export const dynamic = "force-dynamic";
-
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default async function CompaniesPage() {
