@@ -16,9 +16,17 @@ export default function NewCommunityPage() {
     e.preventDefault();
     setBusy(true);
     setError(null);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: emp } = await supabase
+      .from("employees")
+      .select("company_id")
+      .eq("auth_user_id", user!.id)
+      .single();
+
     const { error: insertError } = await supabase
       .from("communities")
-      .insert({ name, location_description: locationDescription || null });
+      .insert({ name, location_description: locationDescription || null, company_id: emp?.company_id });
 
     if (insertError) {
       setError(insertError.message);

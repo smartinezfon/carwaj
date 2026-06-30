@@ -37,10 +37,21 @@ export default function SetPasswordForm({ role }: { role: Role }) {
 
     const { data: userData } = await supabase.auth.getUser();
     if (userData.user) {
-      await supabase
+      const { data: emp } = await supabase
         .from("employees")
         .update({ must_change_password: false })
-        .eq("auth_user_id", userData.user.id);
+        .eq("auth_user_id", userData.user.id)
+        .select("company_id, role")
+        .single();
+
+      // Transition company from pending → active on first login
+      if (emp?.company_id && emp?.role === "admin") {
+        await fetch("/api/superadmin/companies/activate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ company_id: emp.company_id }),
+        });
+      }
     }
 
     setBusy(false);

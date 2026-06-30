@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
   const { data: requester } = await supabase
     .from("employees")
-    .select("role")
+    .select("role, company_id")
     .eq("auth_user_id", session.user.id)
     .single();
   if (requester?.role !== "admin") {
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
       name,
       whatsapp_number: whatsapp_number ?? null,
       role,
+      company_id: requester.company_id,
       community_ids: community_ids ?? [],
     })
     .select()

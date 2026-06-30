@@ -9,9 +9,7 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
+        get(name: string) { return request.cookies.get(name)?.value; },
         set(name: string, value: string, options: CookieOptions) {
           response.cookies.set({ name, value, ...options });
         },
@@ -25,7 +23,10 @@ export async function middleware(request: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
 
   const path = request.nextUrl.pathname;
-  const isProtected = path.startsWith("/cleaner") || path.startsWith("/admin");
+  const isProtected =
+    path.startsWith("/cleaner") ||
+    path.startsWith("/admin") ||
+    path.startsWith("/superadmin");
 
   if (isProtected && !session) {
     const url = request.nextUrl.clone();
@@ -33,10 +34,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (session && (path.startsWith("/cleaner") || path.startsWith("/admin"))) {
+  if (session && isProtected) {
     const { data: employee } = await supabase
       .from("employees")
-      .select("role, must_change_password")
+      .select("role, must_change_password, company_id")
       .eq("auth_user_id", session.user.id)
       .single();
 
@@ -46,14 +47,41 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (path.startsWith("/admin") && employee?.role !== "admin") {
+    const role = employee?.role;
+
+    // Check company is active for non-super-admins
+    if (role !== "super_admin" && employee?.company_id) {
+      const { data: company } = await supabase
+        .from("companies")
+        .select("status")
+        .eq("id", employee.company_id)
+        .single();
+
+      if (company && company.status !== 'active') {
+        const url = request.nextUrl.clone();
+        url.pathname = "/suspended";
+        return NextResponse.redirect(url);
+      }
+    }
+
+    if (role === "super_admin" && !path.startsWith("/superadmin")) {
       const url = request.nextUrl.clone();
-      url.pathname = "/cleaner";
+      url.pathname = "/superadmin";
       return NextResponse.redirect(url);
     }
-    if (path.startsWith("/cleaner") && employee?.role !== "cleaner") {
+    if (path.startsWith("/admin") && role !== "admin") {
       const url = request.nextUrl.clone();
-      url.pathname = "/admin";
+      url.pathname = role === "super_admin" ? "/superadmin" : "/cleaner";
+      return NextResponse.redirect(url);
+    }
+    if (path.startsWith("/cleaner") && role !== "cleaner") {
+      const url = request.nextUrl.clone();
+      url.pathname = role === "admin" ? "/admin" : "/superadmin";
+      return NextResponse.redirect(url);
+    }
+    if (path.startsWith("/superadmin") && role !== "super_admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = role === "admin" ? "/admin" : "/cleaner";
       return NextResponse.redirect(url);
     }
   }
@@ -62,5 +90,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/cleaner/:path*", "/admin/:path*"],
+  matcher: ["/cleaner/:path*", "/admin/:path*", "/superadmin/:path*"],
 };
