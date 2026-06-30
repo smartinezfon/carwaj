@@ -57,7 +57,7 @@ export async function middleware(request: NextRequest) {
         .eq("id", employee.company_id)
         .single();
 
-      if (company && company.status !== 'active') {
+      if (company && company.status === 'suspended') {
         const url = request.nextUrl.clone();
         url.pathname = "/suspended";
         return NextResponse.redirect(url);

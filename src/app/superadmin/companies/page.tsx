@@ -82,11 +82,12 @@ export default async function CompaniesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold">Companies</h1>
           <p className="text-sm text-muted mt-0.5">{companies?.length ?? 0} registered</p>
         </div>
+        <NewCompanyForm />
       </div>
 
       <div className="space-y-4 mb-8">
@@ -252,11 +253,6 @@ export default async function CompaniesPage() {
         )}
       </div>
 
-      {/* Add company */}
-      <div className="rounded-card bg-white border border-line p-5">
-        <h2 className="font-bold mb-4">Add new company</h2>
-        <NewCompanyForm />
-      </div>
     </div>
   );
 }
