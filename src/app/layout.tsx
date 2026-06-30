@@ -25,7 +25,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-const isPreview = process.env.NEXT_PUBLIC_VERCEL_ENV !== "production";
+const isPreview = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("vntkpetoickfmmhsnuea");
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
