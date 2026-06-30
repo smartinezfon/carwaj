@@ -54,11 +54,58 @@ const LINKS = [
   { href: "/admin/payments", label: "Payments", icon: "payments" },
 ];
 
+function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+  return (
+    <nav className="flex flex-col gap-0.5">
+      {LINKS.map((link) => {
+        const active = pathname === link.href;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            onClick={onNavigate}
+            className={`flex items-center gap-2.5 rounded-control px-2.5 py-2.5 text-sm font-semibold ${
+              active ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            {ICONS[link.icon](active ? "#2563eb" : "#5b6573")}
+            {link.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+function UserFooter({ name, onLogout }: { name: string | null; onLogout: () => void }) {
+  return (
+    <>
+      <div className="h-px bg-line my-3.5 mx-1.5" />
+      <div className="flex items-center gap-2.5 px-2 py-1.5">
+        <div className="h-[34px] w-[34px] rounded-full bg-ink text-white flex items-center justify-center font-bold text-sm shrink-0">
+          {name?.[0] ?? "?"}
+        </div>
+        <div className="min-w-0">
+          <div className="font-bold text-[13.5px] truncate">{name ?? "Loading…"}</div>
+          <div className="text-[11.5px] text-muted">Owner</div>
+        </div>
+      </div>
+      <button
+        onClick={onLogout}
+        className="rounded-control px-2.5 py-2 text-left text-sm text-muted hover:bg-gray-50 mt-1"
+      >
+        Log out
+      </button>
+    </>
+  );
+}
+
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
   const [name, setName] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -72,49 +119,73 @@ export default function AdminSidebar() {
     });
   }, [supabase]);
 
+  // Close drawer on route change
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
+
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push("/login");
   }
 
   return (
-    <aside className="w-[212px] shrink-0 bg-white border border-line rounded-card p-4 sticky top-6 self-start m-6 flex flex-col">
-      <div className="px-2 pb-3.5 text-xs font-bold text-muted uppercase tracking-wide font-mono">
-        Carwaj Admin
-      </div>
-      <nav className="flex flex-col gap-0.5">
-        {LINKS.map((link) => {
-          const active = pathname === link.href;
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`flex items-center gap-2.5 rounded-control px-2.5 py-2.5 text-sm font-semibold ${
-                active ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {ICONS[link.icon](active ? "#2563eb" : "#5b6573")}
-              {link.label}
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="h-px bg-line my-3.5 mx-1.5" />
-      <div className="flex items-center gap-2.5 px-2 py-1.5">
-        <div className="h-[34px] w-[34px] rounded-full bg-ink text-white flex items-center justify-center font-bold text-sm shrink-0">
-          {name?.[0] ?? "?"}
+    <>
+      {/* ── Desktop sidebar (md+) ── */}
+      <aside className="hidden md:flex w-[212px] shrink-0 bg-white border border-line rounded-card p-4 sticky top-6 self-start m-6 flex-col">
+        <div className="px-2 pb-3.5 text-xs font-bold text-muted uppercase tracking-wide font-mono">
+          Carwaj Admin
         </div>
-        <div className="min-w-0">
-          <div className="font-bold text-[13.5px] truncate">{name ?? "Loading…"}</div>
-          <div className="text-[11.5px] text-muted">Owner</div>
+        <NavLinks pathname={pathname} />
+        <UserFooter name={name} onLogout={handleLogout} />
+      </aside>
+
+      {/* ── Mobile top bar (< md) ── */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between bg-white border-b border-line px-4 h-14">
+        <span className="text-sm font-bold text-muted uppercase tracking-wide font-mono">Carwaj</span>
+        <button
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Open menu"
+          className="p-2 rounded-control text-gray-600 hover:bg-gray-50"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        </button>
+      </header>
+
+      {/* ── Mobile drawer overlay ── */}
+      {drawerOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 flex"
+          onClick={() => setDrawerOpen(false)}
+        >
+          {/* backdrop */}
+          <div className="absolute inset-0 bg-black/40" />
+
+          {/* drawer panel */}
+          <div
+            className="relative w-64 bg-white h-full flex flex-col p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-muted uppercase tracking-wide font-mono">Carwaj Admin</span>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="p-1.5 rounded-control text-gray-500 hover:bg-gray-50"
+                aria-label="Close menu"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            <NavLinks pathname={pathname} onNavigate={() => setDrawerOpen(false)} />
+            <div className="flex-1" />
+            <UserFooter name={name} onLogout={handleLogout} />
+          </div>
         </div>
-      </div>
-      <button
-        onClick={handleLogout}
-        className="rounded-control px-2.5 py-2 text-left text-sm text-muted hover:bg-gray-50 mt-1"
-      >
-        Log out
-      </button>
-    </aside>
+      )}
+    </>
   );
 }

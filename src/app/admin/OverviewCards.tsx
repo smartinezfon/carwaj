@@ -96,7 +96,7 @@ export default function OverviewCards({
   }
 
   return (
-    <div className="grid grid-cols-3 gap-3.5 items-start">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-start">
       <Card
         icon="◷"
         iconBg="#e8f0fe"
