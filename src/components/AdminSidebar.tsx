@@ -142,7 +142,6 @@ export default function AdminSidebar() {
 
       {/* ── Mobile top bar (< md) ── */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between bg-white border-b border-line px-4 h-14">
-        <span className="text-sm font-bold text-muted uppercase tracking-wide font-mono">Carwaj</span>
         <button
           onClick={() => setDrawerOpen(true)}
           aria-label="Open menu"
@@ -152,6 +151,7 @@ export default function AdminSidebar() {
             <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           </svg>
         </button>
+        <span className="text-sm font-bold text-muted uppercase tracking-wide font-mono">Carwaj</span>
       </header>
 
       {/* ── Mobile drawer overlay ── */}
