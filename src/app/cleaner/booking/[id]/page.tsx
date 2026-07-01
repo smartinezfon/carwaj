@@ -13,7 +13,6 @@ export default function BookingDetailPage() {
   const [booking, setBooking] = useState<BookingWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const beforeInputRef = useRef<HTMLInputElement>(null);
   const afterInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -35,7 +34,7 @@ export default function BookingDetailPage() {
     return { ...raw, villa: raw.car.villa };
   }
 
-  async function uploadPhoto(file: File, kind: "before" | "after") {
+  async function uploadPhoto(file: File) {
     setBusy(true);
     const formData = new FormData();
     formData.append("file", file);
@@ -44,11 +43,10 @@ export default function BookingDetailPage() {
     const uploadData = await uploadRes.json();
 
     if (uploadData.url) {
-      const field = kind === "before" ? "before_photo_url" : "after_photo_url";
       const res = await fetch(`/api/bookings/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: uploadData.url }),
+        body: JSON.stringify({ after_photo_url: uploadData.url }),
       });
       const updated = await res.json();
       setBooking(flattenBooking(updated));
@@ -126,30 +124,6 @@ export default function BookingDetailPage() {
         />
       )}
 
-      <div className="rounded-card bg-white p-5 shadow-sm space-y-3">
-        <h2 className="font-semibold">Before photo</h2>
-        {booking.before_photo_url ? (
-          <img src={booking.before_photo_url} alt="Before" className="rounded-lg w-full" />
-        ) : (
-          <p className="text-sm text-gray-400">No photo yet</p>
-        )}
-        <input
-          ref={beforeInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "before")}
-        />
-        <button
-          disabled={busy}
-          onClick={() => beforeInputRef.current?.click()}
-          className="w-full rounded-lg border-2 border-gray-300 py-3 font-semibold disabled:opacity-50"
-        >
-          Take Before Photo
-        </button>
-      </div>
-
       {booking.status === "scheduled" && (
         <button
           disabled={busy}
@@ -174,7 +148,7 @@ export default function BookingDetailPage() {
             accept="image/*"
             capture="environment"
             className="hidden"
-            onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], "after")}
+            onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])}
           />
           <button
             disabled={busy}
