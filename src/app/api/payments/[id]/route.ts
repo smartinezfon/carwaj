@@ -10,7 +10,22 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 
   const body = await request.json();
-  const { status, payment_method } = body as { status?: string; payment_method?: string };
+  const { status, payment_method, amount, due_date } = body as {
+    status?: string;
+    payment_method?: string;
+    amount?: number;
+    due_date?: string;
+  };
+
+  // Edit-only update (amount / due_date)
+  if (amount !== undefined || due_date !== undefined) {
+    const updates: Record<string, unknown> = {};
+    if (amount !== undefined) updates.amount = amount;
+    if (due_date !== undefined) updates.due_date = due_date;
+    const { error } = await supabase.from("payments").update(updates).eq("id", params.id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
 
   if (status !== "paid" || !payment_method) {
     return NextResponse.json({ error: "status=paid and payment_method are required" }, { status: 400 });

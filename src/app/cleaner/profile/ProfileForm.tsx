@@ -73,7 +73,7 @@ export default function ProfileForm({ employee }: { employee: Employee }) {
           await supabase.auth.signOut();
           window.location.href = "/login";
         }}
-        className="w-full rounded-lg border border-line py-3 text-base font-semibold text-red-600 min-h-11"
+        className="w-full rounded-lg bg-red-600 py-3 text-base font-semibold text-white min-h-11"
       >
         Log out
       </button>

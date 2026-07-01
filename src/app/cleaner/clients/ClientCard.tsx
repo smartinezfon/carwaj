@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import AddCarForm from "./AddCarForm";
 import AddScheduleForm from "./AddScheduleForm";
 import ScheduleBadge from "./ScheduleBadge";
-import CarBadge from "./CarBadge";
 import EditClientForm from "./EditClientForm";
 import PaymentRow from "@/components/PaymentRow";
 
@@ -18,24 +19,47 @@ export default function ClientCard({
   villa,
   employeeId,
   payments,
+  history,
   today,
 }: {
   villa: any;
   employeeId: string;
   payments: any[];
+  history: any[];
   today: string;
 }) {
+  const router = useRouter();
+  const supabase = createClient();
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
-  const carIds = (villa.cars ?? []).map((c: any) => c.id);
-  const validSchedules = (villa.service_subscriptions ?? []).filter(
-    (sub: any) => sub.weekdays && sub.weekdays.length > 0
-  );
-  const hasSchedule = validSchedules.length > 0;
+  const [price, setPrice] = useState<string>(String(villa.monthly_price ?? 0));
+  const [priceSaving, setPriceSaving] = useState(false);
+
+  async function savePrice() {
+    setPriceSaving(true);
+    await supabase.from("villas").update({ monthly_price: Number(price) }).eq("id", villa.id);
+    setPriceSaving(false);
+    router.refresh();
+  }
 
   const pendingPayment = payments.find((p) => p.status === "pending");
   const overdue = pendingPayment ? daysOverdue(pendingPayment.due_date, today) : 0;
   const relevantPayment = pendingPayment ?? payments[0];
+
+  const cars: any[] = villa.cars ?? [];
+
+  // Group subscriptions by car_id
+  const subsByCarId = new Map<string, any[]>();
+  (villa.service_subscriptions ?? []).forEach((sub: any) => {
+    const key = sub.car_id ?? "__none__";
+    const list = subsByCarId.get(key) ?? [];
+    list.push(sub);
+    subsByCarId.set(key, list);
+  });
+
+  const hasAnySchedule = (villa.service_subscriptions ?? []).some(
+    (s: any) => s.weekdays && s.weekdays.length > 0
+  );
 
   return (
     <div className="rounded-card bg-white border border-line overflow-hidden">
@@ -58,7 +82,7 @@ export default function ClientCard({
             >
               {overdue > 0 ? `${overdue}d overdue` : `AED ${pendingPayment.amount} due`}
             </span>
-          ) : hasSchedule ? (
+          ) : hasAnySchedule ? (
             <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
               Paid up
             </span>
@@ -68,7 +92,8 @@ export default function ClientCard({
       </button>
 
       {expanded && (
-        <div className="border-t px-4 py-3">
+        <div className="border-t px-4 py-3 space-y-4">
+          {/* Header: contact + edit */}
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-500">{villa.owner_whatsapp}</p>
             <button
@@ -80,33 +105,75 @@ export default function ClientCard({
           </div>
 
           {editing && (
-            <div className="mt-3">
-              <EditClientForm villa={villa} onClose={() => setEditing(false)} />
-            </div>
+            <EditClientForm villa={villa} onClose={() => setEditing(false)} />
           )}
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {villa.cars?.map((car: any) => <CarBadge key={car.id} car={car} />)}
-            {(!villa.cars || villa.cars.length === 0) && (
-              <span className="text-xs text-gray-400">No cars yet</span>
+          {/* Monthly price */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">Monthly price (AED)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="w-28 rounded-lg border border-line px-2 py-1.5 text-sm"
+            />
+            <button
+              onClick={savePrice}
+              disabled={priceSaving || Number(price) === (villa.monthly_price ?? 0)}
+              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
+            >
+              {priceSaving ? "Saving…" : "Save"}
+            </button>
+          </div>
+
+          {/* Cars — each with its own schedule */}
+          <div className="space-y-3">
+            {cars.length === 0 && (
+              <p className="text-xs text-gray-400">No cars yet</p>
             )}
+            {cars.map((car: any) => {
+              const carSubs = subsByCarId.get(car.id) ?? [];
+              const validSubs = carSubs.filter((s) => s.weekdays?.length > 0);
+              return (
+                <div key={car.id} className="rounded-lg border border-line p-3 space-y-2">
+                  <p className="text-sm font-semibold">
+                    {car.color} {car.make} {car.model}
+                    {car.plate_number && (
+                      <span className="ml-1.5 text-xs font-normal text-gray-400">
+                        · {car.plate_number}
+                      </span>
+                    )}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {validSubs.map((sub: any) => (
+                      <ScheduleBadge
+                        key={sub.id}
+                        subscription={sub}
+                        carId={car.id}
+                        employeeId={employeeId}
+                      />
+                    ))}
+                  </div>
+                  <AddScheduleForm
+                    villaId={villa.id}
+                    carId={car.id}
+                    employeeId={employeeId}
+                    villaPrice={Number(price) || villa.monthly_price || 0}
+                  />
+                </div>
+              );
+            })}
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {validSchedules.map((sub: any) => (
-              <ScheduleBadge key={sub.id} subscription={sub} carIds={carIds} employeeId={employeeId} />
-            ))}
-          </div>
-
-          <div className="mt-3 flex flex-col gap-2 border-t pt-3">
+          {/* Add car */}
+          <div className="border-t pt-3">
             <AddCarForm villaId={villa.id} />
-            {!hasSchedule && (
-              <AddScheduleForm villaId={villa.id} carIds={carIds} employeeId={employeeId} />
-            )}
           </div>
 
+          {/* Payment */}
           {relevantPayment && (
-            <div className="mt-3 border-t pt-3 space-y-2">
+            <div className="border-t pt-3 space-y-2">
               <p className="text-xs font-semibold text-gray-500 uppercase">Payment</p>
               <PaymentRow
                 key={relevantPayment.id}
@@ -114,6 +181,42 @@ export default function ClientCard({
                 overdueDays={relevantPayment.status === "pending" ? overdue : 0}
                 showVilla={false}
               />
+            </div>
+          )}
+
+          {/* Job history */}
+          {history.length > 0 && (
+            <div className="border-t pt-3">
+              <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                History ({history.length})
+              </p>
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                {history.map((b: any) => (
+                  <a
+                    key={b.id}
+                    href={`/cleaner/booking/${b.id}`}
+                    className="flex-shrink-0 w-24 rounded-lg overflow-hidden border border-line"
+                  >
+                    {b.after_photo_url ? (
+                      <img
+                        src={b.after_photo_url}
+                        alt="After"
+                        className="w-24 h-20 object-cover"
+                      />
+                    ) : (
+                      <div className="w-24 h-20 bg-gray-100 flex items-center justify-center">
+                        <span className="text-2xl">🚗</span>
+                      </div>
+                    )}
+                    <div className="p-1.5">
+                      <p className="text-[10px] font-medium text-gray-600 truncate">
+                        {b.car?.make} {b.car?.model}
+                      </p>
+                      <p className="text-[10px] text-gray-400">{b.scheduled_date}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </div>

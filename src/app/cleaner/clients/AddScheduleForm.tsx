@@ -11,12 +11,14 @@ const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function AddScheduleForm({
   villaId,
-  carIds,
+  carId,
   employeeId,
+  villaPrice,
 }: {
   villaId: string;
-  carIds: string[];
+  carId: string;
   employeeId: string;
+  villaPrice: number;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -24,7 +26,6 @@ export default function AddScheduleForm({
   const [weekdays, setWeekdays] = useState<number[]>([1, 3, 5]);
   const [startTime, setStartTime] = useState("07:00");
   const [endTime, setEndTime] = useState("09:00");
-  const [pricePerClean, setPricePerClean] = useState("");
   const [firstPaymentDate, setFirstPaymentDate] = useState(localDateStr());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -41,10 +42,6 @@ export default function AddScheduleForm({
       setError("Pick at least one day");
       return;
     }
-    if (carIds.length === 0) {
-      setError("Add a car to this villa first");
-      return;
-    }
     setBusy(true);
     setError(null);
 
@@ -52,11 +49,12 @@ export default function AddScheduleForm({
       .from("service_subscriptions")
       .insert({
         villa_id: villaId,
+        car_id: carId,
         frequency: "weekly",
         weekdays,
         time_window_start: startTime,
         time_window_end: endTime,
-        price_per_clean: Number(pricePerClean),
+        price_per_clean: villaPrice,
         active: true,
       })
       .select()
@@ -70,7 +68,7 @@ export default function AddScheduleForm({
 
     const bookings = generateUpcomingBookings({
       subscriptionId: subscription.id,
-      carIds,
+      carIds: [carId],
       employeeId,
       weekdays,
       timeWindowStart: startTime,
@@ -90,14 +88,13 @@ export default function AddScheduleForm({
       villaId,
       employeeId,
       subscriptionId: subscription.id,
-      amount: Number(pricePerClean),
+      amount: villaPrice,
       firstPaymentDate,
     });
     await supabase.from("payments").insert(payments);
 
     setBusy(false);
     setOpen(false);
-    setPricePerClean("");
     router.refresh();
   }
 
@@ -105,7 +102,7 @@ export default function AddScheduleForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="text-left text-sm text-blue-600 font-semibold py-2.5 min-h-11"
+        className="text-left text-sm text-blue-600 font-semibold py-1.5 min-h-11"
       >
         + Add schedule
       </button>
@@ -155,18 +152,6 @@ export default function AddScheduleForm({
             className="rounded border px-2 py-2.5 text-sm min-h-11"
           />
         </div>
-      </div>
-
-      <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1">Monthly price (AED)</p>
-        <input
-          required
-          type="number"
-          step="0.01"
-          value={pricePerClean}
-          onChange={(e) => setPricePerClean(e.target.value)}
-          className="w-full rounded border px-2 py-2.5 text-sm min-h-11"
-        />
       </div>
 
       <div>
