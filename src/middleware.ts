@@ -28,6 +28,27 @@ export async function middleware(request: NextRequest) {
     path.startsWith("/admin") ||
     path.startsWith("/superadmin");
 
+  // Handle /set-password separately — not in isProtected but still needs session
+  if (path === "/set-password") {
+    if (!session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+    // If they've already set their password, send them to the right dashboard
+    const { data: emp } = await supabase
+      .from("employees")
+      .select("role, must_change_password")
+      .eq("auth_user_id", session.user.id)
+      .single();
+    if (emp && !emp.must_change_password) {
+      const url = request.nextUrl.clone();
+      url.pathname = emp.role === "admin" ? "/admin" : emp.role === "super_admin" ? "/superadmin" : "/cleaner";
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
+
   if (isProtected && !session) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -90,5 +111,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/cleaner/:path*", "/admin/:path*", "/superadmin/:path*"],
+  matcher: ["/cleaner/:path*", "/admin/:path*", "/superadmin/:path*", "/set-password"],
 };
