@@ -29,9 +29,11 @@ export default function EditCompanyForm({ company, admin }: Props) {
   const [status, setStatus] = useState<CompanyStatus>(company.status);
   const [adminName, setAdminName] = useState(admin?.name ?? "");
   const [adminEmail, setAdminEmail] = useState(admin?.email ?? "");
+  const [adminPassword, setAdminPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,6 +52,7 @@ export default function EditCompanyForm({ company, admin }: Props) {
         admin_id: admin?.id,
         admin_name: adminName,
         admin_email: adminEmail,
+        admin_password: adminPassword || undefined,
       }),
     });
 
@@ -134,6 +137,19 @@ export default function EditCompanyForm({ company, admin }: Props) {
                 className="w-full rounded-lg border border-line px-3 py-2 text-sm"
               />
             </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Temporary password <span className="text-muted font-normal">(leave blank to keep current)</span></label>
+              <input
+                type="text"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="Enter new password"
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm font-mono"
+              />
+              {adminPassword && (
+                <p className="text-xs text-amber-600 mt-1">⚠ This will immediately reset the admin's password.</p>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -178,11 +194,61 @@ export default function EditCompanyForm({ company, admin }: Props) {
         </button>
         <button
           type="button"
-          onClick={() => { setOpen(false); setSaved(false); setError(null); }}
+          onClick={() => { setOpen(false); setSaved(false); setError(null); setConfirmDelete(false); }}
           className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-gray-600"
         >
           Cancel
         </button>
+      </div>
+
+      {/* Delete company */}
+      <div className="border-t border-line pt-4 mt-2">
+        {!confirmDelete ? (
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(true)}
+            className="text-sm text-red-600 font-medium hover:underline"
+          >
+            Delete this company…
+          </button>
+        ) : (
+          <div className="rounded-lg bg-red-50 border border-red-200 p-4 space-y-3">
+            <p className="text-sm font-semibold text-red-800">
+              Permanently delete <span className="font-extrabold">{company.name}</span>?
+            </p>
+            <p className="text-xs text-red-700">
+              This will delete all employees, communities, villas, cars, bookings, payments and schedules for this company. This cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  const res = await fetch(`/api/superadmin/companies/${company.id}`, { method: "DELETE" });
+                  if (!res.ok) {
+                    const data = await res.json();
+                    setError(data.error ?? "Failed to delete");
+                    setBusy(false);
+                    setConfirmDelete(false);
+                  } else {
+                    window.location.reload();
+                  }
+                }}
+                className="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-semibold disabled:opacity-50"
+              >
+                {busy ? "Deleting…" : "Yes, delete everything"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </form>
   );

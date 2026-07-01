@@ -66,6 +66,17 @@ export default function ProfileForm({ employee }: { employee: Employee }) {
       >
         {busy ? "Saving..." : "Save"}
       </button>
+
+      <button
+        type="button"
+        onClick={async () => {
+          await supabase.auth.signOut();
+          window.location.href = "/login";
+        }}
+        className="w-full rounded-lg border border-line py-3 text-base font-semibold text-red-600 min-h-11"
+      >
+        Log out
+      </button>
     </form>
   );
 }

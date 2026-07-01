@@ -48,7 +48,7 @@ export default function CleanerNav() {
 
   async function handleLogout() {
     await supabase.auth.signOut();
-    router.push("/login");
+    window.location.href = "/login";
   }
 
   const tabs = [
@@ -83,9 +83,6 @@ export default function CleanerNav() {
             </div>
             <span className="text-lg font-extrabold tracking-tight">Carwaj</span>
           </div>
-          <button onClick={handleLogout} className="text-sm text-muted font-medium">
-            Log out
-          </button>
         </div>
       </header>
 
