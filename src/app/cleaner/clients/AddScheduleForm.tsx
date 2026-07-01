@@ -11,11 +11,11 @@ const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function AddScheduleForm({
   villaId,
-  carIds,
+  carId,
   employeeId,
 }: {
   villaId: string;
-  carIds: string[];
+  carId: string;
   employeeId: string;
 }) {
   const router = useRouter();
@@ -41,10 +41,6 @@ export default function AddScheduleForm({
       setError("Pick at least one day");
       return;
     }
-    if (carIds.length === 0) {
-      setError("Add a car to this villa first");
-      return;
-    }
     setBusy(true);
     setError(null);
 
@@ -52,6 +48,7 @@ export default function AddScheduleForm({
       .from("service_subscriptions")
       .insert({
         villa_id: villaId,
+        car_id: carId,
         frequency: "weekly",
         weekdays,
         time_window_start: startTime,
@@ -70,7 +67,7 @@ export default function AddScheduleForm({
 
     const bookings = generateUpcomingBookings({
       subscriptionId: subscription.id,
-      carIds,
+      carIds: [carId],
       employeeId,
       weekdays,
       timeWindowStart: startTime,
@@ -105,7 +102,7 @@ export default function AddScheduleForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="text-left text-sm text-blue-600 font-semibold py-2.5 min-h-11"
+        className="text-left text-sm text-blue-600 font-semibold py-1.5 min-h-11"
       >
         + Add schedule
       </button>

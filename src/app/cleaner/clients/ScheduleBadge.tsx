@@ -12,11 +12,11 @@ const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function ScheduleBadge({
   subscription,
-  carIds,
+  carId,
   employeeId,
 }: {
   subscription: ServiceSubscription;
-  carIds: string[];
+  carId: string;
   employeeId: string;
 }) {
   const router = useRouter();
@@ -48,7 +48,7 @@ export default function ScheduleBadge({
 
     const bookings = generateUpcomingBookings({
       subscriptionId: subscription.id,
-      carIds,
+      carIds: [carId],
       employeeId,
       weekdays,
       timeWindowStart: startTime,

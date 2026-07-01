@@ -16,7 +16,7 @@ export default async function ClientsPage() {
 
   const { data: villas } = await supabase
     .from("villas")
-    .select("*, community:communities(name), cars(*), service_subscriptions(*)")
+    .select("*, community:communities(name), cars(*), service_subscriptions(*, car_id)")
     .in("community_id", employee?.community_ids ?? [])
     .order("villa_number");
 
@@ -26,6 +26,14 @@ export default async function ClientsPage() {
     .eq("employee_id", employee?.id ?? "")
     .order("due_date", { ascending: false });
 
+  const { data: completedBookings } = await supabase
+    .from("bookings")
+    .select("id, scheduled_date, after_photo_url, car:cars(id, make, model, color, villa_id)")
+    .eq("employee_id", employee?.id ?? "")
+    .eq("status", "completed")
+    .order("scheduled_date", { ascending: false })
+    .limit(200);
+
   const today = localDateStr();
 
   const paymentsByVilla = new Map<string, any[]>();
@@ -33,6 +41,15 @@ export default async function ClientsPage() {
     const list = paymentsByVilla.get(p.villa_id) ?? [];
     list.push(p);
     paymentsByVilla.set(p.villa_id, list);
+  });
+
+  const historyByVilla = new Map<string, any[]>();
+  (completedBookings ?? []).forEach((b: any) => {
+    const villaId = b.car?.villa_id;
+    if (!villaId) return;
+    const list = historyByVilla.get(villaId) ?? [];
+    list.push(b);
+    historyByVilla.set(villaId, list);
   });
 
   return (
@@ -60,6 +77,7 @@ export default async function ClientsPage() {
             villa={villa}
             employeeId={employee?.id ?? ""}
             payments={paymentsByVilla.get(villa.id) ?? []}
+            history={historyByVilla.get(villa.id) ?? []}
             today={today}
           />
         ))}
