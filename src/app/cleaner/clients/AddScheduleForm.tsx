@@ -95,7 +95,6 @@ export default function AddScheduleForm({
 
     setBusy(false);
     setOpen(false);
-    setPricePerClean("");
     router.refresh();
   }
 
