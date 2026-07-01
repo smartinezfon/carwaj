@@ -26,6 +26,7 @@ export default function ScheduleBadge({
   const [startTime, setStartTime] = useState((subscription.time_window_start ?? "07:00").slice(0, 5));
   const [endTime, setEndTime] = useState((subscription.time_window_end ?? "09:00").slice(0, 5));
   const [pricePerClean, setPricePerClean] = useState(String(subscription.price_per_clean));
+  const [nextPaymentDate, setNextPaymentDate] = useState(localDateStr());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -71,7 +72,7 @@ export default function ScheduleBadge({
       employeeId,
       subscriptionId: subscription.id,
       amount: Number(pricePerClean),
-      startDate: today,
+      firstPaymentDate: nextPaymentDate,
     });
     await supabase.from("payments").insert(payments);
   }
@@ -195,6 +196,17 @@ export default function ScheduleBadge({
           onChange={(e) => setPricePerClean(e.target.value)}
           className="w-full rounded border px-2 py-2.5 text-sm min-h-11"
         />
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-gray-500 mb-1">Next payment due date</p>
+        <input
+          required
+          type="date"
+          value={nextPaymentDate}
+          onChange={(e) => setNextPaymentDate(e.target.value)}
+          className="w-full rounded border px-2 py-2.5 text-sm min-h-11"
+        />
+        <p className="text-xs text-gray-400 mt-1">Replaces any pending payment for this schedule.</p>
       </div>
       <div className="flex gap-2">
         <button

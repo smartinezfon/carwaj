@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 interface PaymentRowProps {
   payment: {
@@ -27,30 +26,16 @@ function pad(n: number) {
 
 export default function PaymentRow({ payment, overdueDays, showVilla = true }: PaymentRowProps) {
   const router = useRouter();
-  const supabase = createClient();
   const [choosingMethod, setChoosingMethod] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function markPaid(method: "cash" | "transfer") {
     setBusy(true);
-    await supabase
-      .from("payments")
-      .update({ status: "paid", payment_method: method, paid_at: new Date().toISOString() })
-      .eq("id", payment.id);
-
-    if (payment.subscription_id) {
-      const [y, m, d] = payment.due_date.split("-").map(Number);
-      const next = new Date(y, m - 1 + 1, d);
-      const nextDue = `${next.getFullYear()}-${pad(next.getMonth() + 1)}-${pad(next.getDate())}`;
-      await supabase.from("payments").insert({
-        villa_id: payment.villa_id,
-        employee_id: payment.employee_id,
-        subscription_id: payment.subscription_id,
-        amount: payment.amount,
-        due_date: nextDue,
-        status: "pending",
-      });
-    }
+    await fetch(`/api/payments/${payment.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "paid", payment_method: method }),
+    });
 
     setBusy(false);
     setChoosingMethod(false);

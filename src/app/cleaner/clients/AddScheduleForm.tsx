@@ -25,6 +25,7 @@ export default function AddScheduleForm({
   const [startTime, setStartTime] = useState("07:00");
   const [endTime, setEndTime] = useState("09:00");
   const [pricePerClean, setPricePerClean] = useState("");
+  const [firstPaymentDate, setFirstPaymentDate] = useState(localDateStr());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -90,7 +91,7 @@ export default function AddScheduleForm({
       employeeId,
       subscriptionId: subscription.id,
       amount: Number(pricePerClean),
-      startDate: localDateStr(),
+      firstPaymentDate,
     });
     await supabase.from("payments").insert(payments);
 
@@ -166,6 +167,18 @@ export default function AddScheduleForm({
           onChange={(e) => setPricePerClean(e.target.value)}
           className="w-full rounded border px-2 py-2.5 text-sm min-h-11"
         />
+      </div>
+
+      <div>
+        <p className="text-xs font-semibold text-gray-500 mb-1">First payment due date</p>
+        <input
+          required
+          type="date"
+          value={firstPaymentDate}
+          onChange={(e) => setFirstPaymentDate(e.target.value)}
+          className="w-full rounded border px-2 py-2.5 text-sm min-h-11"
+        />
+        <p className="text-xs text-gray-400 mt-1">Payments will repeat monthly from this date.</p>
       </div>
 
       <div className="flex gap-2">

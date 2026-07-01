@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { sendWhatsAppMessage } from "@/lib/twilio";
+import { notifyCarCleaned } from "@/lib/whatsapp";
 import type { BookingStatus } from "@/lib/types";
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
@@ -43,24 +43,16 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  if (status === "in_progress" || status === "completed") {
+  if (status === "completed") {
     const villa = booking.car.villa;
-    const carModel = `${booking.car.make} ${booking.car.model}`;
-    const ownerName = villa.owner_name;
-
+    const carLabel = `${booking.car.make} ${booking.car.model}`;
     try {
-      if (status === "in_progress") {
-        await sendWhatsAppMessage({
-          to: villa.owner_whatsapp,
-          message: `Hi ${ownerName}, we are starting to clean your ${carModel} now`,
-        });
-      } else {
-        await sendWhatsAppMessage({
-          to: villa.owner_whatsapp,
-          message: `Your ${carModel} is clean! ✅`,
-          mediaUrl: booking.after_photo_url ?? undefined,
-        });
-      }
+      await notifyCarCleaned({
+        ownerPhone: villa.owner_whatsapp,
+        ownerName: villa.owner_name,
+        carLabel,
+        afterPhotoUrl: booking.after_photo_url,
+      });
     } catch {
       // WhatsApp delivery failure should not block the booking update
     }

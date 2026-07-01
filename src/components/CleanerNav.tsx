@@ -55,7 +55,7 @@ export default function CleanerNav() {
     { href: "/cleaner", label: "Today", icon: "today" },
     { href: "/cleaner/calendar", label: "Calendar", icon: "calendar" },
     { href: "/cleaner/clients", label: "Clients", icon: "clients" },
-    { href: "/cleaner/history", label: "History", icon: "history" },
+    { href: "/cleaner/payments", label: "Payments", icon: "history" },
     { href: "/cleaner/profile", label: "Profile", icon: "profile" },
   ];
 
