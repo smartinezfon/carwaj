@@ -40,7 +40,7 @@ export const CAR_CATALOG: Record<string, string[]> = {
   Ferrari: ["488", "Roma", "Portofino", "SF90", "296 GTB", "Purosangue"],
   Lamborghini: ["Urus", "Huracan", "Aventador", "Revuelto"],
   Maserati: ["Levante", "Ghibli", "Quattroporte", "Grecale", "GranTurismo"],
-  Alfa Romeo: ["Giulia", "Stelvio", "Tonale"],
+  "Alfa Romeo": ["Giulia", "Stelvio", "Tonale"],
 
   // French
   Renault: ["Duster", "Koleos", "Captur", "Megane", "Logan", "Symbol", "Arkana"],
