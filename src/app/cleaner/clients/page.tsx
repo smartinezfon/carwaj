@@ -16,7 +16,7 @@ export default async function ClientsPage() {
 
   const { data: villas } = await supabase
     .from("villas")
-    .select("*, community:communities(name), cars(*), service_subscriptions(*, car_id)")
+    .select("*, community:communities(name), cars(*), service_subscriptions(*, car_id), monthly_price")
     .in("community_id", employee?.community_ids ?? [])
     .order("villa_number");
 

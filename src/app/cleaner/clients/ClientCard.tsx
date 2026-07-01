@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import AddCarForm from "./AddCarForm";
 import AddScheduleForm from "./AddScheduleForm";
 import ScheduleBadge from "./ScheduleBadge";
@@ -26,8 +28,19 @@ export default function ClientCard({
   history: any[];
   today: string;
 }) {
+  const router = useRouter();
+  const supabase = createClient();
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [price, setPrice] = useState<string>(String(villa.monthly_price ?? 0));
+  const [priceSaving, setPriceSaving] = useState(false);
+
+  async function savePrice() {
+    setPriceSaving(true);
+    await supabase.from("villas").update({ monthly_price: Number(price) }).eq("id", villa.id);
+    setPriceSaving(false);
+    router.refresh();
+  }
 
   const pendingPayment = payments.find((p) => p.status === "pending");
   const overdue = pendingPayment ? daysOverdue(pendingPayment.due_date, today) : 0;
@@ -95,6 +108,25 @@ export default function ClientCard({
             <EditClientForm villa={villa} onClose={() => setEditing(false)} />
           )}
 
+          {/* Monthly price */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">Monthly price (AED)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="w-28 rounded-lg border border-line px-2 py-1.5 text-sm"
+            />
+            <button
+              onClick={savePrice}
+              disabled={priceSaving || Number(price) === (villa.monthly_price ?? 0)}
+              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
+            >
+              {priceSaving ? "Saving…" : "Save"}
+            </button>
+          </div>
+
           {/* Cars — each with its own schedule */}
           <div className="space-y-3">
             {cars.length === 0 && (
@@ -127,6 +159,7 @@ export default function ClientCard({
                     villaId={villa.id}
                     carId={car.id}
                     employeeId={employeeId}
+                    villaPrice={Number(price) || villa.monthly_price || 0}
                   />
                 </div>
               );
