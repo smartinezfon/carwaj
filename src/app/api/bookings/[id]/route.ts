@@ -46,6 +46,12 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   if (status === "completed") {
     const villa = booking.car.villa;
     const carLabel = `${booking.car.make} ${booking.car.model}`;
+    console.log("[WhatsApp] Sending notification", {
+      ownerPhone: villa?.owner_whatsapp,
+      ownerName: villa?.owner_name,
+      carLabel,
+      afterPhotoUrl: booking.after_photo_url,
+    });
     try {
       await notifyCarCleaned({
         ownerPhone: villa.owner_whatsapp,
@@ -53,8 +59,9 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         carLabel,
         afterPhotoUrl: booking.after_photo_url,
       });
+      console.log("[WhatsApp] Notification sent successfully");
     } catch (err) {
-      console.error("WhatsApp notification failed:", err);
+      console.error("[WhatsApp] Notification failed:", err);
     }
   }
 
