@@ -53,8 +53,8 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         carLabel,
         afterPhotoUrl: booking.after_photo_url,
       });
-    } catch {
-      // WhatsApp delivery failure should not block the booking update
+    } catch (err) {
+      console.error("WhatsApp notification failed:", err);
     }
   }
 
