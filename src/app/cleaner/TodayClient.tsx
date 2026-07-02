@@ -94,18 +94,31 @@ export default function TodayClient({
   return (
     <div className="space-y-5">
       {/* Progress header */}
-      <div className="rounded-card bg-white p-4 shadow-sm flex items-center justify-between">
+      <div className="rounded-[20px] bg-white border border-[#e6eaef] p-4 flex items-center justify-between shadow-[0_1px_2px_rgba(15,23,42,.05)]">
         <div>
-          <p className="text-sm text-gray-500">{formatDate(today)}</p>
-          <p className="text-2xl font-bold mt-0.5">
+          <p className="text-[13px] text-[#7b8696]">{formatDate(today)}</p>
+          <p className="text-[26px] font-extrabold tracking-[-0.03em] mt-0.5 tabular-nums">
             <span className="text-green-600">{completed.length}</span>
-            <span className="text-gray-300"> / </span>
+            <span className="text-[#cbd2db]"> / </span>
             <span>{bookings.length}</span>
           </p>
         </div>
-        {bookings.length > 0 && completed.length === bookings.length && (
-          <span className="rounded-full bg-green-100 px-3 py-1.5 text-sm font-semibold text-green-700">
-            All done 🎉
+        {/* Donut */}
+        {bookings.length > 0 && (
+          <div
+            className="w-[58px] h-[58px] rounded-full flex items-center justify-center shrink-0"
+            style={{
+              background: `conic-gradient(#16a34a ${Math.round(completed.length / bookings.length * 100) * 3.6}deg, #e6eaef 0)`,
+            }}
+          >
+            <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center text-[13px] font-extrabold text-green-600 tabular-nums">
+              {Math.round(completed.length / bookings.length * 100)}%
+            </div>
+          </div>
+        )}
+        {bookings.length === 0 && (
+          <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-400">
+            No jobs
           </span>
         )}
       </div>

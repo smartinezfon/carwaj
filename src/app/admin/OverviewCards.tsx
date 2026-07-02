@@ -2,8 +2,43 @@
 
 import { useState } from "react";
 
+function ChevronDown({ open }: { open: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+      style={{ transition: "transform .2s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
+      <path d="M6 9l6 6 6-6" stroke="#9aa3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconClock({ fg }: { fg: string }) {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="8.5" stroke={fg} strokeWidth="1.9"/>
+      <path d="M12 7.5V12l3 2" stroke={fg} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+function IconCalendar({ fg }: { fg: string }) {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="5.5" width="16" height="15" rx="3" stroke={fg} strokeWidth="1.9"/>
+      <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" stroke={fg} strokeWidth="1.9" strokeLinecap="round"/>
+    </svg>
+  );
+}
+function IconWallet({ fg }: { fg: string }) {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="6" width="18" height="12" rx="3" stroke={fg} strokeWidth="1.9"/>
+      <path d="M3 10h18" stroke={fg} strokeWidth="1.9"/>
+      <circle cx="16.5" cy="14" r="1.2" fill={fg}/>
+    </svg>
+  );
+}
+
 function Card({
-  icon,
+  iconType,
   iconBg,
   iconFg,
   label,
@@ -12,7 +47,7 @@ function Card({
   onToggle,
   children,
 }: {
-  icon: string;
+  iconType: "clock" | "calendar" | "wallet";
   iconBg: string;
   iconFg: string;
   label: string;
@@ -23,30 +58,26 @@ function Card({
 }) {
   return (
     <div
-      className={`self-start rounded-card bg-white border border-line overflow-hidden transition-shadow ${
-        expanded ? "shadow-md ring-1 ring-blue-100" : ""
+      className={`self-start rounded-[20px] bg-white border border-[#e6eaef] overflow-hidden transition-shadow ${
+        expanded ? "shadow-md" : ""
       }`}
     >
       <button onClick={onToggle} className="w-full text-left p-[18px]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span
-              className="h-[30px] w-[30px] rounded-[9px] flex items-center justify-center font-extrabold text-sm font-mono"
-              style={{ backgroundColor: iconBg, color: iconFg }}
+              className="h-[30px] w-[30px] rounded-[9px] flex items-center justify-center"
+              style={{ backgroundColor: iconBg }}
             >
-              {icon}
+              {iconType === "clock" && <IconClock fg={iconFg} />}
+              {iconType === "calendar" && <IconCalendar fg={iconFg} />}
+              {iconType === "wallet" && <IconWallet fg={iconFg} />}
             </span>
-            <span className="text-[12.5px] text-muted font-semibold">{label}</span>
+            <span className="text-[12.5px] text-[#7b8696] font-semibold">{label}</span>
           </div>
-          <span
-            className={`text-gray-400 transition-transform duration-200 ${
-              expanded ? "rotate-180 text-blue-500" : ""
-            }`}
-          >
-            ▾
-          </span>
+          <ChevronDown open={expanded} />
         </div>
-        <p className="text-[28px] font-extrabold tracking-tight mt-3">{value}</p>
+        <p className="text-[28px] font-extrabold tracking-[-0.04em] mt-3 tabular-nums">{value}</p>
       </button>
       <div
         className={`grid transition-all duration-200 ease-out ${
@@ -98,7 +129,7 @@ export default function OverviewCards({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-start">
       <Card
-        icon="◷"
+        iconType="clock"
         iconBg="#e8f0fe"
         iconFg="#2563eb"
         label="Jobs Today"
@@ -111,7 +142,7 @@ export default function OverviewCards({
       </Card>
 
       <Card
-        icon="▦"
+        iconType="calendar"
         iconBg="#e7f7ee"
         iconFg="#16a34a"
         label="Jobs This Week"
@@ -129,7 +160,7 @@ export default function OverviewCards({
       </Card>
 
       <Card
-        icon="AED"
+        iconType="wallet"
         iconBg="#fdeccf"
         iconFg="#d97706"
         label="Revenue This Month"

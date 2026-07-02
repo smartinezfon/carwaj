@@ -78,15 +78,22 @@ export default async function VillasPage() {
             </p>
 
             <div className="mt-3 flex flex-wrap gap-2">
-              {villa.cars?.map((car: any) => (
-                <span
-                  key={car.id}
-                  className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700"
-                >
-                  🚗 {car.color} {car.make} {car.model}
-                  {car.plate_number ? ` · ${car.plate_number}` : ""}
-                </span>
-              ))}
+              {villa.cars?.map((car: any) => {
+                const swatchMap: Record<string, string> = {
+                  white: "#f1f3f6", black: "#2b2f36", silver: "#c8ccd2",
+                  grey: "#9aa0a8", gray: "#9aa0a8", blue: "#2f4a6b", red: "#8a3030",
+                };
+                const swatch = swatchMap[car.color?.toLowerCase()] ?? "#e6eaef";
+                return (
+                  <span
+                    key={car.id}
+                    className="inline-flex items-center gap-[7px] text-xs font-semibold text-[#374151] bg-[#f1f3f6] px-[11px] py-[5px] rounded-full"
+                  >
+                    <span className="w-3.5 h-3.5 rounded-[5px] border border-black/[0.07] shrink-0" style={{ background: swatch }} />
+                    {car.color} {car.make} {car.model}
+                  </span>
+                );
+              })}
               {(!villa.cars || villa.cars.length === 0) && (
                 <span className="text-xs text-gray-400">No cars yet</span>
               )}

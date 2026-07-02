@@ -51,16 +51,16 @@ export default async function EmployeesPage() {
       </div>
       <div className="overflow-x-auto rounded-card bg-white border border-line">
         <table className="w-full text-left">
-          <thead className="bg-gray-50 text-sm text-gray-500">
+          <thead className="bg-[#fafbfc] border-b border-[#eef1f5] text-[11px] font-bold text-[#9aa3af] uppercase tracking-[0.03em]">
             <tr>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Role</th>
-              <th className="px-4 py-3">WhatsApp</th>
-              <th className="px-4 py-3">Communities</th>
-              <th className="px-4 py-3">Cleaned this week</th>
-              <th className="px-4 py-3">Cleaned this month</th>
-              <th className="px-4 py-3">Book of business</th>
+              <th className="px-4 py-3 text-left">Name</th>
+              <th className="px-4 py-3 text-left">Email</th>
+              <th className="px-4 py-3 text-left">Role</th>
+              <th className="px-4 py-3 text-left">WhatsApp</th>
+              <th className="px-4 py-3 text-left">Communities</th>
+              <th className="px-4 py-3 text-right">Week</th>
+              <th className="px-4 py-3 text-right">Month</th>
+              <th className="px-4 py-3 text-right">Book</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>

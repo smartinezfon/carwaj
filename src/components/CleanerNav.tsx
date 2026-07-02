@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const ICONS: Record<string, (color: string) => React.ReactNode> = {
@@ -45,6 +46,19 @@ export default function CleanerNav() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const [initial, setInitial] = useState<string>("?");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: emp } = await supabase
+        .from("employees")
+        .select("name")
+        .eq("auth_user_id", data.user.id)
+        .single();
+      if (emp?.name) setInitial(emp.name[0].toUpperCase());
+    });
+  }, [supabase]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -62,31 +76,31 @@ export default function CleanerNav() {
   return (
     <>
       <header className="sticky top-0 z-10 bg-white/85 backdrop-blur-md border-b border-line">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-[9px] bg-blue-600 flex items-center justify-center shadow-[0_2px_8px_rgba(37,99,235,.35)]">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M3 13.5l1.8-5.1A2.5 2.5 0 0 1 7.1 6.7h9.8a2.5 2.5 0 0 1 2.3 1.7l1.8 5.1"
-                  stroke="#fff"
-                  strokeWidth="1.9"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M3 13.5h18v3.2a1 1 0 0 1-1 1h-1.6a1 1 0 0 1-1-1v-.7H6.6v.7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3.2z"
-                  stroke="#fff"
-                  strokeWidth="1.9"
-                  strokeLinejoin="round"
-                />
+        <div className="flex items-center justify-between px-[18px] py-3">
+          <div className="flex items-center gap-[9px]">
+            <div className="h-7 w-7 rounded-[9px] bg-blue-600 flex items-center justify-center shadow-[0_4px_12px_-3px_rgba(37,99,235,.55)]">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                <path d="M3.6 15.2l1.5-3.9A2.5 2.5 0 0 1 7.4 9.6h7.2a2.5 2.5 0 0 1 2.3 1.6l1.5 3.9" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 15.2h16v2a1 1 0 0 1-1 1h-.3a1 1 0 0 1-1-1v-.2H5.3v.2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2z" stroke="#fff" strokeWidth="1.7" strokeLinejoin="round"/>
+                <circle cx="7.3" cy="16.1" r="1.3" fill="#2563eb" stroke="#fff" strokeWidth="1.2"/>
+                <circle cx="14.7" cy="16.1" r="1.3" fill="#2563eb" stroke="#fff" strokeWidth="1.2"/>
+                <path d="M19.4 4.2C19.6 5.9 20.1 6.4 21.8 6.6C20.1 6.8 19.6 7.3 19.4 9C19.2 7.3 18.7 6.8 17 6.6C18.7 6.4 19.2 5.9 19.4 4.2Z" fill="#fff"/>
               </svg>
             </div>
-            <span className="text-lg font-extrabold tracking-tight">Carwaj</span>
+            <span className="text-[17px] font-extrabold tracking-[-0.025em]">Carwaj</span>
           </div>
+          {/* Avatar */}
+          <button
+            onClick={handleLogout}
+            title="Log out"
+            className="w-8 h-8 rounded-full bg-[#dfe7f5] text-blue-600 flex items-center justify-center font-extrabold text-sm select-none"
+          >
+            {initial}
+          </button>
         </div>
       </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-10 mx-auto max-w-md bg-white/90 backdrop-blur-md border-t border-line flex pb-[max(env(safe-area-inset-bottom),10px)] pt-2">
+      <nav className="fixed bottom-0 left-0 right-0 z-10 mx-auto max-w-md bg-white/90 backdrop-blur-md border-t border-[#e9edf2] flex pb-[max(env(safe-area-inset-bottom),10px)] pt-2">
         {tabs.map((tab) => {
           const active = pathname === tab.href;
           const color = active ? BLUE : GREY;
@@ -94,10 +108,10 @@ export default function CleanerNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className="flex-1 flex flex-col items-center gap-1 py-1 min-h-11"
+              className="flex-1 flex flex-col items-center gap-[3px] py-1 min-h-11"
             >
               {ICONS[tab.icon](color)}
-              <span className="text-[11px] font-semibold" style={{ color }}>
+              <span className="text-[10.5px] font-semibold" style={{ color }}>
                 {tab.label}
               </span>
             </Link>

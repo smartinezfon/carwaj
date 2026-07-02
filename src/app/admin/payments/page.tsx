@@ -38,41 +38,40 @@ export default async function PaymentsPage() {
       </p>
       <div className="overflow-x-auto rounded-card bg-white border border-line">
         <table className="w-full text-left">
-          <thead className="bg-gray-50 text-sm text-gray-500">
+          <thead className="bg-[#fafbfc] border-b border-[#eef1f5] text-[11px] font-bold text-[#9aa3af] uppercase tracking-[0.03em]">
             <tr>
-              <th className="px-4 py-3">Villa</th>
-              <th className="px-4 py-3">Owner</th>
-              <th className="px-4 py-3">Amount</th>
-              <th className="px-4 py-3">Due date</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Responsible</th>
-              <th className="px-4 py-3">Paid via</th>
+              <th className="px-4 py-3 text-left">Villa</th>
+              <th className="px-4 py-3 text-left">Owner</th>
+              <th className="px-4 py-3 text-right">Amount</th>
+              <th className="px-4 py-3 text-left">Due date</th>
+              <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-left">Responsible</th>
+              <th className="px-4 py-3 text-left">Paid via</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody>
             {(payments ?? []).map((p: any) => {
               const overdue = p.status === "pending" ? daysOverdue(p.due_date, today) : 0;
               const cleanerName = p.employee_id ? employeeNameById.get(p.employee_id) ?? "Unknown" : "Unassigned";
 
+              let statusEl: React.ReactNode;
+              if (p.status === "paid") {
+                statusEl = <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-[#e7f7ee] text-[#15803d]"><span className="w-1.5 h-1.5 rounded-full bg-[#16a34a]" />Paid</span>;
+              } else if (overdue > 0) {
+                statusEl = <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-[#fdecec] text-[#b91c1c]"><span className="w-1.5 h-1.5 rounded-full bg-[#ef4444]" />{overdue}d overdue</span>;
+              } else {
+                statusEl = <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-[#fff4e5] text-[#b45309]"><span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]" />Upcoming</span>;
+              }
+
               return (
-                <tr key={p.id}>
-                  <td className="px-4 py-3">{p.villa?.villa_number}</td>
-                  <td className="px-4 py-3">{p.villa?.owner_name}</td>
-                  <td className="px-4 py-3">AED {p.amount}</td>
-                  <td className="px-4 py-3">{p.due_date}</td>
-                  <td className="px-4 py-3">
-                    {p.status === "paid" ? (
-                      <span className="text-green-700 font-medium">Paid</span>
-                    ) : overdue > 0 ? (
-                      <span className="text-red-600 font-medium">
-                        {overdue} day{overdue === 1 ? "" : "s"} overdue
-                      </span>
-                    ) : (
-                      <span className="text-yellow-700 font-medium">Upcoming</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">{cleanerName}</td>
-                  <td className="px-4 py-3 capitalize">{p.payment_method ?? "—"}</td>
+                <tr key={p.id} className="border-b border-[#f2f4f7] hover:bg-[#fafbfc] transition-colors">
+                  <td className="px-4 py-3.5 font-bold text-[13.5px]">{p.villa?.villa_number}</td>
+                  <td className="px-4 py-3.5 text-[#374151] text-[13.5px]">{p.villa?.owner_name}</td>
+                  <td className="px-4 py-3.5 text-right font-bold font-mono tabular-nums text-[13.5px]">AED {p.amount}</td>
+                  <td className="px-4 py-3.5 font-mono text-[12px] text-[#6b7280]">{p.due_date}</td>
+                  <td className="px-4 py-3.5">{statusEl}</td>
+                  <td className="px-4 py-3.5 text-[#6b7280] text-[13.5px]">{cleanerName}</td>
+                  <td className="px-4 py-3.5 capitalize text-[#6b7280] text-[13.5px]">{p.payment_method ?? "—"}</td>
                 </tr>
               );
             })}
