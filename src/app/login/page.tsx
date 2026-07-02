@@ -89,7 +89,7 @@ export default function LoginPage() {
         </div>
 
         {/* Password */}
-        <div className="mb-6">
+        <div className="mb-8">
           <label className="block text-[12.5px] font-semibold text-[#4a5563] mb-[7px]">Password</label>
           <div className="flex items-center gap-[9px] border border-[#dde3ea] rounded-[12px] px-[13px] h-[46px] bg-[#fbfcfd] focus-within:border-blue-500">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -116,23 +116,6 @@ export default function LoginPage() {
           {loading ? "Signing in…" : "Sign in"}
         </button>
 
-        {/* Role shortcut buttons */}
-        <div className="flex gap-[9px] mt-[14px]">
-          <button
-            type="button"
-            onClick={() => { setEmail(""); setPassword(""); }}
-            className="flex-1 h-[42px] border border-[#e0e5ec] rounded-[11px] bg-white hover:bg-[#f6f8fa] text-[#374151] font-semibold text-[13.5px] transition-colors"
-          >
-            I&apos;m a cleaner
-          </button>
-          <button
-            type="button"
-            onClick={() => { setEmail(""); setPassword(""); }}
-            className="flex-1 h-[42px] border border-[#e0e5ec] rounded-[11px] bg-white hover:bg-[#f6f8fa] text-[#374151] font-semibold text-[13.5px] transition-colors"
-          >
-            I&apos;m the boss
-          </button>
-        </div>
       </form>
 
       <p className="mt-[22px] text-[#9aa3af] text-[12.5px]">Carwaj · car care, organised</p>
