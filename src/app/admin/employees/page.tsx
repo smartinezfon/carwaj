@@ -49,53 +49,39 @@ export default async function EmployeesPage() {
           + New Employee
         </Link>
       </div>
-      <div className="overflow-x-auto rounded-card bg-white border border-line">
-        <table className="w-full text-left">
-          <thead className="bg-[#fafbfc] border-b border-[#eef1f5] text-[11px] font-bold text-[#9aa3af] uppercase tracking-[0.03em]">
-            <tr>
-              <th className="px-4 py-3 text-left">Name</th>
-              <th className="px-4 py-3 text-left">Email</th>
-              <th className="px-4 py-3 text-left">Role</th>
-              <th className="px-4 py-3 text-left">WhatsApp</th>
-              <th className="px-4 py-3 text-left">Communities</th>
-              <th className="px-4 py-3 text-right">Week</th>
-              <th className="px-4 py-3 text-right">Month</th>
-              <th className="px-4 py-3 text-right">Book</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {employees?.map((emp) => {
-              const empBookings = (bookings ?? []).filter((b: any) => b.employee_id === emp.id);
-              const weekCount = empBookings.filter(
-                (b: any) => b.status === "completed" && b.scheduled_date >= weekStart
-              ).length;
-              const monthCount = empBookings.filter((b: any) => b.status === "completed").length;
-              const villaIds = new Set(
-                villas
-                  ?.filter((v) => emp.community_ids?.includes(v.community_id))
-                  .map((v) => v.id)
-              );
-              const bookOfBusiness = Array.from(villaIds).reduce(
-                (sum, vId) => sum + (priceByVilla.get(vId) ?? 0),
-                0
-              );
+      <div className="space-y-2">
+        {employees?.map((emp) => {
+          const empBookings = (bookings ?? []).filter((b: any) => b.employee_id === emp.id);
+          const weekCount = empBookings.filter(
+            (b: any) => b.status === "completed" && b.scheduled_date >= weekStart
+          ).length;
+          const monthCount = empBookings.filter((b: any) => b.status === "completed").length;
+          const villaIds = new Set(
+            villas
+              ?.filter((v) => emp.community_ids?.includes(v.community_id))
+              .map((v) => v.id)
+          );
+          const bookOfBusiness = Array.from(villaIds).reduce(
+            (sum, vId) => sum + (priceByVilla.get(vId) ?? 0),
+            0
+          );
 
-              return (
-                <EmployeeRow
-                  key={emp.id}
-                  employee={emp}
-                  email={emp.auth_user_id ? emailByAuthUserId.get(emp.auth_user_id) ?? "" : ""}
-                  communities={communities ?? []}
-                  weekCount={weekCount}
-                  monthCount={monthCount}
-                  bookOfBusiness={bookOfBusiness}
-                  isSelf={emp.auth_user_id === session.user.id}
-                />
-              );
-            })}
-          </tbody>
-        </table>
+          return (
+            <EmployeeRow
+              key={emp.id}
+              employee={emp}
+              email={emp.auth_user_id ? emailByAuthUserId.get(emp.auth_user_id) ?? "" : ""}
+              communities={communities ?? []}
+              weekCount={weekCount}
+              monthCount={monthCount}
+              bookOfBusiness={bookOfBusiness}
+              isSelf={emp.auth_user_id === session.user.id}
+            />
+          );
+        })}
+        {(!employees || employees.length === 0) && (
+          <p className="text-center text-gray-400 py-10">No employees yet.</p>
+        )}
       </div>
     </div>
   );

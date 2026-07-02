@@ -55,7 +55,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[392px] rounded-[22px] bg-white border border-[#e6eaef] p-[38px_34px] shadow-[0_24px_60px_-32px_rgba(15,23,42,.32)] space-y-0"
+        className="w-full max-w-[392px] rounded-[22px] bg-white border border-[#e6eaef] p-[38px_34px] shadow-[0_24px_60px_-32px_rgba(15,23,42,.32)]"
       >
         {/* Logo */}
         <div className="w-12 h-12 rounded-[15px] bg-blue-600 flex items-center justify-center mb-[22px] shadow-[0_10px_22px_-8px_rgba(37,99,235,.55)]">
@@ -89,7 +89,7 @@ export default function LoginPage() {
         </div>
 
         {/* Password */}
-        <div className="mb-8">
+        <div className="mb-7">
           <label className="block text-[12.5px] font-semibold text-[#4a5563] mb-[7px]">Password</label>
           <div className="flex items-center gap-[9px] border border-[#dde3ea] rounded-[12px] px-[13px] h-[46px] bg-[#fbfcfd] focus-within:border-blue-500">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -111,7 +111,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-12 rounded-[12px] bg-blue-600 hover:bg-[#1d4ed8] text-white font-bold text-[15px] disabled:opacity-50 shadow-[0_8px_20px_-6px_rgba(37,99,235,.5)] transition-colors"
+          className="w-full h-12 mt-6 rounded-[12px] bg-blue-600 hover:bg-[#1d4ed8] text-white font-bold text-[15px] disabled:opacity-50 shadow-[0_8px_20px_-6px_rgba(37,99,235,.5)] transition-colors"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>

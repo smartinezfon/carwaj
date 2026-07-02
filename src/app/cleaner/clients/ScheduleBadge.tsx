@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { generateUpcomingBookings } from "@/lib/generateBookings";
-import { generateUpcomingPayments } from "@/lib/generatePayments";
 import { localDateStr } from "@/lib/date";
 import type { ServiceSubscription } from "@/lib/types";
 
@@ -25,8 +24,6 @@ export default function ScheduleBadge({
   const [weekdays, setWeekdays] = useState<number[]>(subscription.weekdays ?? []);
   const [startTime, setStartTime] = useState((subscription.time_window_start ?? "07:00").slice(0, 5));
   const [endTime, setEndTime] = useState((subscription.time_window_end ?? "09:00").slice(0, 5));
-  const [pricePerClean, setPricePerClean] = useState(String(subscription.price_per_clean));
-  const [nextPaymentDate, setNextPaymentDate] = useState(localDateStr());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -59,24 +56,6 @@ export default function ScheduleBadge({
     }
   }
 
-  async function regenerateFuturePayments() {
-    await supabase
-      .from("payments")
-      .delete()
-      .eq("subscription_id", subscription.id)
-      .eq("status", "pending")
-      .gte("due_date", today);
-
-    const payments = generateUpcomingPayments({
-      villaId: subscription.villa_id,
-      employeeId,
-      subscriptionId: subscription.id,
-      amount: Number(pricePerClean),
-      firstPaymentDate: nextPaymentDate,
-    });
-    await supabase.from("payments").insert(payments);
-  }
-
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (weekdays.length === 0) {
@@ -92,7 +71,6 @@ export default function ScheduleBadge({
         weekdays,
         time_window_start: startTime,
         time_window_end: endTime,
-        price_per_clean: Number(pricePerClean),
       })
       .eq("id", subscription.id);
 
@@ -103,7 +81,6 @@ export default function ScheduleBadge({
     }
 
     await regenerateFutureBookings();
-    await regenerateFuturePayments();
 
     setBusy(false);
     setEditing(false);
@@ -139,8 +116,7 @@ export default function ScheduleBadge({
         className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 min-h-11"
       >
         {subscription.weekdays?.map((d) => WEEKDAY_LABELS[d]).join("/")} ·{" "}
-        {subscription.time_window_start?.slice(0, 5)}-{subscription.time_window_end?.slice(0, 5)} ·
-        AED {subscription.price_per_clean}/mo
+        {subscription.time_window_start?.slice(0, 5)}-{subscription.time_window_end?.slice(0, 5)}
         <span className="text-green-500">✎</span>
       </button>
     );
@@ -185,28 +161,6 @@ export default function ScheduleBadge({
             className="rounded border px-2 py-2.5 text-sm min-h-11"
           />
         </div>
-      </div>
-      <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1">Monthly price (AED)</p>
-        <input
-          required
-          type="number"
-          step="0.01"
-          value={pricePerClean}
-          onChange={(e) => setPricePerClean(e.target.value)}
-          className="w-full rounded border px-2 py-2.5 text-sm min-h-11"
-        />
-      </div>
-      <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1">Next payment due date</p>
-        <input
-          required
-          type="date"
-          value={nextPaymentDate}
-          onChange={(e) => setNextPaymentDate(e.target.value)}
-          className="w-full rounded border px-2 py-2.5 text-sm min-h-11"
-        />
-        <p className="text-xs text-gray-400 mt-1">Replaces any pending payment for this schedule.</p>
       </div>
       <div className="flex gap-2">
         <button
