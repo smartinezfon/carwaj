@@ -44,24 +44,34 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 
   if (status === "completed") {
-    const villa = booking.car.villa;
-    const carLabel = `${booking.car.make} ${booking.car.model}`;
-    console.log("[WhatsApp] Sending notification", {
-      ownerPhone: villa?.owner_whatsapp,
-      ownerName: villa?.owner_name,
-      carLabel,
-      afterPhotoUrl: booking.after_photo_url,
-    });
-    try {
-      await notifyCarCleaned({
+    const car = booking.car;
+    const villa = car?.villa;
+
+    if (!villa?.owner_whatsapp) {
+      console.warn("[WhatsApp] Skipped: villa or owner_whatsapp missing", {
+        carId: car?.id,
+        villaId: villa?.id,
+        owner_whatsapp: villa?.owner_whatsapp ?? null,
+      });
+    } else {
+      const carLabel = `${car.make} ${car.model}`;
+      console.log("[WhatsApp] Sending notification", {
         ownerPhone: villa.owner_whatsapp,
         ownerName: villa.owner_name,
         carLabel,
         afterPhotoUrl: booking.after_photo_url,
       });
-      console.log("[WhatsApp] Notification sent successfully");
-    } catch (err) {
-      console.error("[WhatsApp] Notification failed:", err);
+      try {
+        await notifyCarCleaned({
+          ownerPhone: villa.owner_whatsapp,
+          ownerName: villa.owner_name,
+          carLabel,
+          afterPhotoUrl: booking.after_photo_url,
+        });
+        console.log("[WhatsApp] Notification sent successfully");
+      } catch (err) {
+        console.error("[WhatsApp] Notification failed:", err instanceof Error ? err.message : err);
+      }
     }
   }
 
