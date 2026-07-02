@@ -18,6 +18,15 @@ const jetBrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Carwaj",
   description: "Car cleaning schedule and operations manager",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Carwaj",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
