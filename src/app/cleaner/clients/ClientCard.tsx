@@ -136,12 +136,14 @@ export default function ClientCard({
                       />
                     ))}
                   </div>
-                  <AddScheduleForm
-                    villaId={villa.id}
-                    carId={car.id}
-                    employeeId={employeeId}
-                    villaPrice={Number(price) || villa.monthly_price || 0}
-                  />
+                  {validSubs.length === 0 && (
+                    <AddScheduleForm
+                      villaId={villa.id}
+                      carId={car.id}
+                      employeeId={employeeId}
+                      villaPrice={Number(price) || villa.monthly_price || 0}
+                    />
+                  )}
                 </div>
               );
             })}

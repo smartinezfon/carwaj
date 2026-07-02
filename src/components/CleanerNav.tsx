@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -44,7 +44,6 @@ const GREY = "#9aa3af";
 
 export default function CleanerNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const supabase = createClient();
   const [initial, setInitial] = useState<string>("?");
 
@@ -60,17 +59,11 @@ export default function CleanerNav() {
     });
   }, [supabase]);
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    window.location.href = "/login";
-  }
-
   const tabs = [
     { href: "/cleaner", label: "Today", icon: "today" },
     { href: "/cleaner/calendar", label: "Calendar", icon: "calendar" },
     { href: "/cleaner/clients", label: "Clients", icon: "clients" },
     { href: "/cleaner/payments", label: "Payments", icon: "history" },
-    { href: "/cleaner/profile", label: "Profile", icon: "profile" },
   ];
 
   return (
@@ -89,14 +82,13 @@ export default function CleanerNav() {
             </div>
             <span className="text-[17px] font-extrabold tracking-[-0.025em]">Carwaj</span>
           </div>
-          {/* Avatar */}
-          <button
-            onClick={handleLogout}
-            title="Log out"
+          {/* Avatar → profile */}
+          <Link
+            href="/cleaner/profile"
             className="w-8 h-8 rounded-full bg-[#dfe7f5] text-blue-600 flex items-center justify-center font-extrabold text-sm select-none"
           >
             {initial}
-          </button>
+          </Link>
         </div>
       </header>
 
