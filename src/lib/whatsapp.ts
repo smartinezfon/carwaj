@@ -20,12 +20,13 @@ async function sendMessage(to: string, body: Record<string, unknown>) {
     body: JSON.stringify({ to: formatPhone(to), ...body }),
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`WasenderAPI error ${res.status}: ${JSON.stringify(err)}`);
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok || data?.success === false) {
+    throw new Error(`WasenderAPI error ${res.status}: ${JSON.stringify(data)}`);
   }
 
-  return res.json();
+  return data;
 }
 
 // ── Notification senders ────────────────────────────────────────────────────
