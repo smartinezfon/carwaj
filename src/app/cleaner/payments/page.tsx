@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getEmployee } from "@/lib/getEmployee";
 import PaymentsClient from "./PaymentsClient";
 
 export default async function PaymentsPage() {
@@ -7,25 +8,23 @@ export default async function PaymentsPage() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect("/login");
 
-  const { data: employee } = await supabase
-    .from("employees")
-    .select("id")
-    .eq("auth_user_id", session.user.id)
-    .single();
+  const employee = await getEmployee(session.user.id);
+  const employeeId = employee?.id ?? "";
 
-  const { data: pending } = await supabase
-    .from("payments")
-    .select("*, villa:villas(villa_number, owner_name, owner_whatsapp, community:communities(name))")
-    .eq("employee_id", employee?.id ?? "")
-    .eq("status", "pending")
-    .order("due_date", { ascending: true });
-
-  const { data: paid } = await supabase
-    .from("payments")
-    .select("*, villa:villas(villa_number, owner_name, community:communities(name))")
-    .eq("employee_id", employee?.id ?? "")
-    .eq("status", "paid")
-    .order("paid_at", { ascending: false });
+  const [{ data: pending }, { data: paid }] = await Promise.all([
+    supabase
+      .from("payments")
+      .select("*, villa:villas(villa_number, owner_name, owner_whatsapp, community:communities(name))")
+      .eq("employee_id", employeeId)
+      .eq("status", "pending")
+      .order("due_date", { ascending: true }),
+    supabase
+      .from("payments")
+      .select("*, villa:villas(villa_number, owner_name, community:communities(name))")
+      .eq("employee_id", employeeId)
+      .eq("status", "paid")
+      .order("paid_at", { ascending: false }),
+  ]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -36,7 +35,6 @@ export default async function PaymentsPage() {
     return { ...p, overdueDays };
   });
 
-  // Sort: overdue first (most overdue at top), then upcoming
   pendingWithOverdue.sort((a, b) => {
     if (a.overdueDays > 0 && b.overdueDays > 0) return b.overdueDays - a.overdueDays;
     if (a.overdueDays > 0) return -1;

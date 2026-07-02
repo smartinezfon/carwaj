@@ -1,38 +1,36 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getEmployee } from "@/lib/getEmployee";
 import ClientCard from "./ClientCard";
 import { localDateStr } from "@/lib/date";
+
 export default async function ClientsPage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect("/login");
 
-  const { data: employee } = await supabase
-    .from("employees")
-    .select("id, community_ids")
-    .eq("auth_user_id", session.user.id)
-    .single();
+  const employee = await getEmployee(session.user.id);
 
-  const { data: villas } = await supabase
-    .from("villas")
-    .select("*, community:communities(name), cars(*), service_subscriptions(*, car_id), monthly_price")
-    .in("community_id", employee?.community_ids ?? [])
-    .order("villa_number");
-
-  const { data: payments } = await supabase
-    .from("payments")
-    .select("*, villa:villas(villa_number, owner_name)")
-    .eq("employee_id", employee?.id ?? "")
-    .order("due_date", { ascending: false });
-
-  const { data: completedBookings } = await supabase
-    .from("bookings")
-    .select("id, scheduled_date, after_photo_url, car:cars(id, make, model, color, villa_id)")
-    .eq("employee_id", employee?.id ?? "")
-    .eq("status", "completed")
-    .order("scheduled_date", { ascending: false })
-    .limit(200);
+  const [{ data: villas }, { data: payments }, { data: completedBookings }] = await Promise.all([
+    supabase
+      .from("villas")
+      .select("*, community:communities(name), cars(*), service_subscriptions(*, car_id), monthly_price")
+      .in("community_id", employee?.community_ids ?? [])
+      .order("villa_number"),
+    supabase
+      .from("payments")
+      .select("*, villa:villas(villa_number, owner_name)")
+      .eq("employee_id", employee?.id ?? "")
+      .order("due_date", { ascending: false }),
+    supabase
+      .from("bookings")
+      .select("id, scheduled_date, after_photo_url, car:cars(id, make, model, color, villa_id)")
+      .eq("employee_id", employee?.id ?? "")
+      .eq("status", "completed")
+      .order("scheduled_date", { ascending: false })
+      .limit(200),
+  ]);
 
   const today = localDateStr();
 

@@ -1,30 +1,29 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getEmployee } from "@/lib/getEmployee";
 import ProfileForm from "./ProfileForm";
+
 export default async function ProfilePage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect("/login");
 
-  const { data: employee } = await supabase
-    .from("employees")
-    .select("*")
-    .eq("auth_user_id", session.user.id)
-    .single();
+  const employee = await getEmployee(session.user.id);
 
   if (!employee) {
     return <p className="text-center text-gray-500 py-10">Profile not found.</p>;
   }
 
-  const { data: communities } = await supabase
-    .from("communities")
-    .select("id, name")
-    .in("id", employee.community_ids ?? []);
-
-  const { data: villas } = await supabase
-    .from("villas")
-    .select("id, community_id, cars(id), service_subscriptions(price_per_clean, weekdays)")
-    .in("community_id", employee.community_ids ?? []);
+  const [{ data: communities }, { data: villas }] = await Promise.all([
+    supabase
+      .from("communities")
+      .select("id, name")
+      .in("id", employee.community_ids ?? []),
+    supabase
+      .from("villas")
+      .select("id, community_id, cars(id), service_subscriptions(price_per_clean, weekdays)")
+      .in("community_id", employee.community_ids ?? []),
+  ]);
 
   const communitySummary = (communities ?? []).map((community) => {
     const communityVillas = (villas ?? []).filter((v: any) => v.community_id === community.id);

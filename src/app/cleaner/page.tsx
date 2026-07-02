@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { localDateStr } from "@/lib/date";
+import { getEmployee } from "@/lib/getEmployee";
 import TodayClient from "./TodayClient";
 
 export default async function TodaySchedulePage() {
@@ -8,13 +9,7 @@ export default async function TodaySchedulePage() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect("/login");
 
-  const { data: employee } = await supabase
-    .from("employees")
-    .select("id")
-    .eq("auth_user_id", session.user.id)
-    .single();
-
-  const today = localDateStr();
+  const [employee, today] = [await getEmployee(session.user.id), localDateStr()];
 
   const { data: bookings } = await supabase
     .from("bookings")

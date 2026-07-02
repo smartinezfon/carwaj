@@ -5,6 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import StatusBadge from "@/components/StatusBadge";
 import type { BookingWithDetails } from "@/lib/types";
+import imageCompression from "browser-image-compression";
+
+type UploadState =
+  | { status: "idle" }
+  | { status: "compressing" }
+  | { status: "uploading" }
+  | { status: "error"; message: string; file: File };
 
 export default function BookingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +20,8 @@ export default function BookingDetailPage() {
   const [booking, setBooking] = useState<BookingWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadState, setUploadState] = useState<UploadState>({ status: "idle" });
   const afterInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -34,24 +43,50 @@ export default function BookingDetailPage() {
     return { ...raw, villa: raw.car.villa };
   }
 
-  async function uploadPhoto(file: File) {
-    setBusy(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("bookingId", id);
-    const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-    const uploadData = await uploadRes.json();
+  async function runUpload(file: File) {
+    setUploadState({ status: "compressing" });
 
-    if (uploadData.url) {
-      const res = await fetch(`/api/bookings/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ after_photo_url: uploadData.url }),
+    let compressed: File;
+    try {
+      compressed = await imageCompression(file, {
+        maxSizeMB: 1.5,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
       });
-      const updated = await res.json();
-      setBooking(flattenBooking(updated));
+    } catch {
+      compressed = file;
     }
-    setBusy(false);
+
+    setUploadState({ status: "uploading" });
+
+    try {
+      const formData = new FormData();
+      formData.append("file", compressed, file.name);
+      formData.append("bookingId", id);
+      const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!uploadRes.ok) throw new Error(await uploadRes.text());
+      const uploadData = await uploadRes.json();
+
+      if (uploadData.url) {
+        const res = await fetch(`/api/bookings/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ after_photo_url: uploadData.url }),
+        });
+        const updated = await res.json();
+        setBooking(flattenBooking(updated));
+        setPreviewUrl(null);
+      }
+      setUploadState({ status: "idle" });
+    } catch (err: any) {
+      setUploadState({ status: "error", message: err.message ?? "Upload failed", file });
+    }
+  }
+
+  function handleFileSelect(file: File) {
+    const localUrl = URL.createObjectURL(file);
+    setPreviewUrl(localUrl);
+    runUpload(file);
   }
 
   async function updateStatus(status: "in_progress" | "completed") {
@@ -88,6 +123,9 @@ export default function BookingDetailPage() {
   if (!booking) {
     return <div className="p-6 text-center text-gray-500">Job not found.</div>;
   }
+
+  const isUploading =
+    uploadState.status === "compressing" || uploadState.status === "uploading";
 
   return (
     <div className="space-y-4">
@@ -137,32 +175,63 @@ export default function BookingDetailPage() {
       {booking.status === "in_progress" && (
         <div className="rounded-card bg-white p-5 shadow-sm space-y-3">
           <h2 className="font-semibold">After photo</h2>
-          {booking.after_photo_url ? (
-            <img src={booking.after_photo_url} alt="After" className="rounded-lg w-full" />
-          ) : (
+
+          {/* Photo preview: optimistic local preview while uploading, then confirmed URL */}
+          {(previewUrl || booking.after_photo_url) && (
+            <div className="relative">
+              <img
+                src={previewUrl ?? booking.after_photo_url!}
+                alt="After"
+                className="rounded-lg w-full"
+              />
+              {isUploading && (
+                <div className="absolute inset-0 rounded-lg bg-black/40 flex flex-col items-center justify-center gap-2">
+                  <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                  <p className="text-white text-sm font-semibold">
+                    {uploadState.status === "compressing" ? "Compressing…" : "Uploading…"}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!previewUrl && !booking.after_photo_url && (
             <p className="text-sm text-gray-400">No photo yet</p>
           )}
+
+          {uploadState.status === "error" && (
+            <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 flex items-center justify-between">
+              <span>{uploadState.message}</span>
+              <button
+                onClick={() => runUpload(uploadState.file)}
+                className="ml-3 font-semibold underline shrink-0"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
           <input
             ref={afterInputRef}
             type="file"
             accept="image/*"
             capture="environment"
             className="hidden"
-            onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])}
+            onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
           />
           <button
-            disabled={busy}
+            disabled={isUploading}
             onClick={() => afterInputRef.current?.click()}
             className="w-full rounded-lg border-2 border-gray-300 py-3 font-semibold disabled:opacity-50"
           >
-            Take After Photo
+            {booking.after_photo_url ? "Retake Photo" : "Take After Photo"}
           </button>
         </div>
       )}
 
       {booking.status === "in_progress" && (
         <button
-          disabled={busy}
+          disabled={busy || isUploading}
           onClick={() => updateStatus("completed")}
           className="w-full rounded-lg bg-green-600 py-4 text-lg font-bold text-white disabled:opacity-50"
         >
