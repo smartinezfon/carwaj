@@ -87,12 +87,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       const { data: comm } = await supabase.from("communities").select("name").eq("id", villa.community_id).single();
       if (comm?.name) communityName = comm.name;
     }
-    const car = booking.car;
     await slackJobCompleted({
       cleanerName,
       villaNumber: booking.car?.villa?.villa_number ?? "?",
       communityName,
-      carLabel: `${car?.make ?? ""} ${car?.model ?? ""}`.trim(),
+      carLabel: `${booking.car?.make ?? ""} ${booking.car?.model ?? ""}`.trim(),
     });
   }
 
