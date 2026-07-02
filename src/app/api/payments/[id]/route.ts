@@ -75,17 +75,30 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
   }
 
-  // Fetch community name for Slack
-  let communityName = "";
+  // Fetch context for Slack
   if (payment.villa_id) {
     const { data: v } = await supabase
       .from("villas")
-      .select("villa_number, community:communities(name)")
+      .select("villa_number, community:communities(name, company:companies(name))")
       .eq("id", payment.villa_id)
       .single();
     const villaNumber = (v as any)?.villa_number ?? "?";
-    communityName = (v as any)?.community?.name ?? "";
+    const communityName = (v as any)?.community?.name ?? "";
+    const companyName = (v as any)?.community?.company?.name ?? "";
+
+    let cleanerName = "";
+    if (payment.employee_id) {
+      const { data: emp } = await supabase
+        .from("employees")
+        .select("name")
+        .eq("id", payment.employee_id)
+        .single();
+      if (emp?.name) cleanerName = emp.name;
+    }
+
     await slackPaymentReceived({
+      companyName,
+      cleanerName,
       villaNumber,
       communityName,
       amount: payment.amount,

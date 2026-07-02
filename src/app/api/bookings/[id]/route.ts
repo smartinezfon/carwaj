@@ -77,20 +77,31 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     // Slack notification (best-effort)
     const employeeId = booking.employee_id;
-    let cleanerName = "Unknown cleaner";
-    let communityName = villa?.community_id ? "Unknown community" : "";
+    let cleanerName = "Unknown";
+    let communityName = "";
+    let companyName = "";
     if (employeeId) {
-      const { data: emp } = await supabase.from("employees").select("name").eq("id", employeeId).single();
+      const { data: emp } = await supabase
+        .from("employees")
+        .select("name, company:companies(name)")
+        .eq("id", employeeId)
+        .single();
       if (emp?.name) cleanerName = emp.name;
+      if ((emp as any)?.company?.name) companyName = (emp as any).company.name;
     }
     if (villa?.community_id) {
-      const { data: comm } = await supabase.from("communities").select("name").eq("id", villa.community_id).single();
+      const { data: comm } = await supabase
+        .from("communities")
+        .select("name")
+        .eq("id", villa.community_id)
+        .single();
       if (comm?.name) communityName = comm.name;
     }
     await slackJobCompleted({
+      companyName,
       cleanerName,
-      villaNumber: booking.car?.villa?.villa_number ?? "?",
       communityName,
+      villaNumber: villa?.villa_number ?? "?",
       carLabel: `${booking.car?.make ?? ""} ${booking.car?.model ?? ""}`.trim(),
     });
   }

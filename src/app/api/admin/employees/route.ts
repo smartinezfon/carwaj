@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
   const { data: requester } = await supabase
     .from("employees")
-    .select("role, company_id")
+    .select("role, company_id, company:companies(name)")
     .eq("auth_user_id", session.user.id)
     .single();
   if (requester?.role !== "admin") {
@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
-  await slackCleanerAdded({ name, role });
+  const companyName = (requester as any)?.company?.name ?? "";
+  await slackCleanerAdded({ companyName, name, role });
   return NextResponse.json(employee, { status: 201 });
 }

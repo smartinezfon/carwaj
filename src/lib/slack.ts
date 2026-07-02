@@ -8,70 +8,107 @@ const EMOJI = {
 
 async function post(text: string) {
   const url = process.env.SLACK_WEBHOOK_URL;
-  if (!url) return; // silently skip if not configured
+  if (!url) return;
   await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text }),
-  }).catch(() => {}); // never throw — notification failure must not break the app
+  }).catch(() => {});
+}
+
+function ctx({
+  company,
+  cleaner,
+  community,
+  villa,
+}: {
+  company?: string;
+  cleaner?: string;
+  community?: string;
+  villa?: string;
+}) {
+  const parts = [];
+  if (company) parts.push(`🏢 ${company}`);
+  if (cleaner) parts.push(`👤 ${cleaner}`);
+  if (community) parts.push(`📍 ${community}`);
+  if (villa) parts.push(`🏠 Villa ${villa}`);
+  return parts.length ? `\n${parts.join("  ·  ")}` : "";
 }
 
 export async function slackJobCompleted({
+  companyName,
   cleanerName,
-  villaNumber,
   communityName,
+  villaNumber,
   carLabel,
 }: {
+  companyName: string;
   cleanerName: string;
-  villaNumber: string;
   communityName: string;
+  villaNumber: string;
   carLabel: string;
 }) {
   await post(
-    `${EMOJI.job} *Job completed* — ${cleanerName} cleaned the *${carLabel}* at Villa ${villaNumber}, ${communityName}`
+    `${EMOJI.job} *Job completed* — *${carLabel}* cleaned` +
+    ctx({ company: companyName, cleaner: cleanerName, community: communityName, villa: villaNumber })
   );
 }
 
 export async function slackPaymentReceived({
-  villaNumber,
+  companyName,
+  cleanerName,
   communityName,
+  villaNumber,
   amount,
   method,
 }: {
-  villaNumber: string;
+  companyName: string;
+  cleanerName?: string;
   communityName: string;
+  villaNumber: string;
   amount: number;
   method: string;
 }) {
   await post(
-    `${EMOJI.payment} *Payment received* — Villa ${villaNumber} (${communityName}) paid *AED ${amount}* via ${method}`
+    `${EMOJI.payment} *Payment received* — *AED ${amount}* via ${method}` +
+    ctx({ company: companyName, cleaner: cleanerName, community: communityName, villa: villaNumber })
   );
 }
 
 export async function slackCustomerAdded({
-  villaNumber,
+  companyName,
+  cleanerName,
   communityName,
+  villaNumber,
   ownerName,
 }: {
-  villaNumber: string;
+  companyName: string;
+  cleanerName?: string;
   communityName: string;
+  villaNumber: string;
   ownerName: string;
 }) {
   await post(
-    `${EMOJI.customer} *New customer* — ${ownerName} at Villa ${villaNumber}, ${communityName}`
+    `${EMOJI.customer} *New customer* — ${ownerName}` +
+    ctx({ company: companyName, cleaner: cleanerName, community: communityName, villa: villaNumber })
   );
 }
 
 export async function slackCleanerAdded({
+  companyName,
   name,
   role,
 }: {
+  companyName: string;
   name: string;
   role: string;
 }) {
-  await post(`${EMOJI.cleaner} *New ${role}* added — ${name}`);
+  await post(
+    `${EMOJI.cleaner} *New ${role} added* — ${name}` +
+    ctx({ company: companyName })
+  );
 }
 
 export async function slackCompanyAdded({ name }: { name: string }) {
-  await post(`${EMOJI.company} *New company* created — ${name}`);
+  await post(`${EMOJI.company} *New company created* — ${name}`);
 }

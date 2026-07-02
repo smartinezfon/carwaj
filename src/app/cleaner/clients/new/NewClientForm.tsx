@@ -45,7 +45,7 @@ export default function NewClientForm({ communities }: { communities: Community[
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         event: "customer_added",
-        payload: { villaNumber, communityName, ownerName },
+        payload: { villaNumber, communityName, communityId, ownerName },
       }),
     }).catch(() => {});
 
