@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { notifyPaymentReceived } from "@/lib/whatsapp";
+import { slackPaymentReceived } from "@/lib/slack";
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -59,17 +60,37 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 
   const villa = (payment as any).villa;
+  const methodLabel = payment_method === "cash" ? "cash" : "bank transfer";
+
   if (villa?.owner_whatsapp) {
     try {
       await notifyPaymentReceived({
         ownerPhone: villa.owner_whatsapp,
         ownerName: villa.owner_name,
         amount: payment.amount,
-        method: payment_method === "cash" ? "cash" : "bank transfer",
+        method: methodLabel,
       });
     } catch {
       // notification failure should not block the payment update
     }
+  }
+
+  // Fetch community name for Slack
+  let communityName = "";
+  if (payment.villa_id) {
+    const { data: v } = await supabase
+      .from("villas")
+      .select("villa_number, community:communities(name)")
+      .eq("id", payment.villa_id)
+      .single();
+    const villaNumber = (v as any)?.villa_number ?? "?";
+    communityName = (v as any)?.community?.name ?? "";
+    await slackPaymentReceived({
+      villaNumber,
+      communityName,
+      amount: payment.amount,
+      method: methodLabel,
+    });
   }
 
   return NextResponse.json(payment);

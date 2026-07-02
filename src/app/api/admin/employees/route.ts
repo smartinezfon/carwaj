@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { slackCleanerAdded } from "@/lib/slack";
 
 export async function POST(request: NextRequest) {
   const supabase = createClient();
@@ -67,5 +68,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
+  await slackCleanerAdded({ name, role });
   return NextResponse.json(employee, { status: 201 });
 }

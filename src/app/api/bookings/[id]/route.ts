@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { notifyCarCleaned } from "@/lib/whatsapp";
+import { slackJobCompleted } from "@/lib/slack";
 import type { BookingStatus } from "@/lib/types";
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
@@ -73,6 +74,26 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         console.error("[WhatsApp] Notification failed:", err instanceof Error ? err.message : err);
       }
     }
+
+    // Slack notification (best-effort)
+    const employeeId = booking.employee_id;
+    let cleanerName = "Unknown cleaner";
+    let communityName = villa?.community_id ? "Unknown community" : "";
+    if (employeeId) {
+      const { data: emp } = await supabase.from("employees").select("name").eq("id", employeeId).single();
+      if (emp?.name) cleanerName = emp.name;
+    }
+    if (villa?.community_id) {
+      const { data: comm } = await supabase.from("communities").select("name").eq("id", villa.community_id).single();
+      if (comm?.name) communityName = comm.name;
+    }
+    const car = booking.car;
+    await slackJobCompleted({
+      cleanerName,
+      villaNumber: booking.car?.villa?.villa_number ?? "?",
+      communityName,
+      carLabel: `${car?.make ?? ""} ${car?.model ?? ""}`.trim(),
+    });
   }
 
   return NextResponse.json(booking);

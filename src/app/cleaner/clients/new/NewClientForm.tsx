@@ -38,6 +38,17 @@ export default function NewClientForm({ communities }: { communities: Community[
       setBusy(false);
       return;
     }
+
+    const communityName = communities.find((c) => c.id === communityId)?.name ?? "";
+    fetch("/api/slack/notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: "customer_added",
+        payload: { villaNumber, communityName, ownerName },
+      }),
+    }).catch(() => {});
+
     router.push("/cleaner/clients");
     router.refresh();
   }

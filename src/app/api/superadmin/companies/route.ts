@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { slackCompanyAdded } from "@/lib/slack";
 
 export async function POST(request: NextRequest) {
   const supabase = createClient();
@@ -62,5 +63,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: empError.message }, { status: 500 });
   }
 
+  await slackCompanyAdded({ name });
   return NextResponse.json(company, { status: 201 });
 }
