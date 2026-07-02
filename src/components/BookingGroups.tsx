@@ -60,24 +60,30 @@ export function CommunityGroup({ name, bookings }: { name: string; bookings: Gro
     return acc;
   }, {});
 
+  const summary = `${villaNumbers.length} villa${villaNumbers.length !== 1 ? "s" : ""} · ${bookings.length} car${bookings.length !== 1 ? "s" : ""}`;
+
   return (
-    <div>
+    <div className="space-y-2">
+      {/* Card-bubble header */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between mb-2"
+        className="w-full rounded-card bg-white border border-line px-4 py-3 flex items-center justify-between"
       >
-        <h2 className="text-xs font-bold uppercase tracking-wide text-gray-400">{name}</h2>
+        <h2 className="text-[13px] font-bold text-gray-700">{name}</h2>
         <div className="flex items-center gap-2">
           {!open && (
-            <span className="text-xs text-gray-400">
-              {villaNumbers.length} villa{villaNumbers.length !== 1 ? "s" : ""} · {bookings.length} car{bookings.length !== 1 ? "s" : ""}
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
+              {summary}
             </span>
+          )}
+          {open && (
+            <span className="text-xs text-gray-400 font-medium">{summary}</span>
           )}
           <ChevronDown open={open} />
         </div>
       </button>
       {open && (
-        <div className="space-y-2">
+        <div className="space-y-2 pl-1">
           {Object.entries(byVilla).map(([villaNumber, villaBookings]) => (
             <VillaGroup key={villaNumber} villaNumber={villaNumber} bookings={villaBookings} />
           ))}

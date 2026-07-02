@@ -50,19 +50,30 @@ function Section({
   const isCompleted = variant === "completed";
 
   return (
-    <div>
+    <div className="space-y-2">
+      {/* Card-bubble header */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between mb-3"
+        className={`w-full rounded-card bg-white border px-4 py-3 flex items-center justify-between ${
+          isCompleted ? "border-green-200" : "border-line"
+        }`}
       >
-        <span className={`text-sm font-bold ${isCompleted ? "text-green-600" : "text-gray-700"}`}>
-          {title}
-        </span>
-        <div className={`flex items-center gap-2 ${isCompleted ? "text-green-500" : "text-gray-400"}`}>
+        <div className="flex items-center gap-2.5">
+          <span className={`w-2 h-2 rounded-full shrink-0 ${isCompleted ? "bg-green-500" : "bg-blue-500"}`} />
+          <span className={`font-bold text-[14px] ${isCompleted ? "text-green-700" : "text-gray-700"}`}>
+            {title}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
           {!open && (
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
               isCompleted ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
             }`}>
+              {summary}
+            </span>
+          )}
+          {open && (
+            <span className={`text-xs font-medium ${isCompleted ? "text-green-500" : "text-gray-400"}`}>
               {summary}
             </span>
           )}
@@ -71,7 +82,7 @@ function Section({
       </button>
 
       {open && (
-        <div className="space-y-4">
+        <div className="space-y-4 pl-1">
           {Object.entries(byCommunity).map(([community, communityBookings]) => (
             <CommunityGroup key={community} name={community} bookings={communityBookings} />
           ))}

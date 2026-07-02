@@ -1,4 +1,5 @@
 export type Role = "cleaner" | "admin";
+export type VillaStatus = "active" | "paused" | "former";
 export type BookingStatus = "scheduled" | "in_progress" | "completed" | "cancelled";
 export type SubscriptionFrequency = "weekly" | "biweekly" | "monthly";
 export type PaymentStatus = "pending" | "paid";
@@ -17,6 +18,7 @@ export interface Villa {
   owner_name: string;
   owner_whatsapp: string;
   notes: string | null;
+  status: VillaStatus;
   created_at: string;
 }
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getEmployee } from "@/lib/getEmployee";
 import ClientCard from "./ClientCard";
+import ClientStatusGroups from "./ClientStatusGroups";
 import { localDateStr } from "@/lib/date";
 
 export default async function ClientsPage() {
@@ -15,7 +16,7 @@ export default async function ClientsPage() {
   const [{ data: villas }, { data: payments }, { data: completedBookings }] = await Promise.all([
     supabase
       .from("villas")
-      .select("*, community:communities(name), cars(*), service_subscriptions(*, car_id), monthly_price")
+      .select("*, community:communities(name), cars(*), service_subscriptions(*, car_id)")
       .in("community_id", employee?.community_ids ?? [])
       .order("villa_number"),
     supabase
@@ -50,6 +51,14 @@ export default async function ClientsPage() {
     historyByVilla.set(villaId, list);
   });
 
+  const enrichedVillas = (villas ?? []).map((villa: any) => ({
+    villa,
+    employeeId: employee?.id ?? "",
+    payments: paymentsByVilla.get(villa.id) ?? [],
+    history: historyByVilla.get(villa.id) ?? [],
+    today,
+  }));
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -62,24 +71,13 @@ export default async function ClientsPage() {
         </Link>
       </div>
 
-      {(!villas || villas.length === 0) && (
+      {enrichedVillas.length === 0 && (
         <p className="text-center text-gray-500 py-10">
           No clients yet. Add your first villa to get started.
         </p>
       )}
 
-      <div className="space-y-3">
-        {villas?.map((villa: any) => (
-          <ClientCard
-            key={villa.id}
-            villa={villa}
-            employeeId={employee?.id ?? ""}
-            payments={paymentsByVilla.get(villa.id) ?? []}
-            history={historyByVilla.get(villa.id) ?? []}
-            today={today}
-          />
-        ))}
-      </div>
+      <ClientStatusGroups villas={enrichedVillas} />
     </div>
   );
 }
