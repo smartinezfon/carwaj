@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import type { Employee, Role } from "@/lib/types";
 
 interface Community {
@@ -22,13 +21,14 @@ export default function EditEmployeeForm({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const supabase = createClient();
   const [name, setName] = useState(employee.name);
   const [whatsappNumber, setWhatsappNumber] = useState(employee.whatsapp_number ?? "");
   const [role, setRole] = useState<Role>(employee.role);
   const [selectedCommunities, setSelectedCommunities] = useState<string[]>(
     employee.community_ids ?? []
   );
+  const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -43,25 +43,31 @@ export default function EditEmployeeForm({
     setBusy(true);
     setError(null);
 
-    const updates: Record<string, unknown> = {
+    const body: Record<string, unknown> = {
       name,
       whatsapp_number: whatsappNumber || null,
     };
     if (!isSelf) {
-      updates.role = role;
-      updates.community_ids = selectedCommunities;
+      body.role = role;
+      body.community_ids = selectedCommunities;
+    }
+    if (newPassword) {
+      body.new_password = newPassword;
     }
 
-    const { error: updateError } = await supabase
-      .from("employees")
-      .update(updates)
-      .eq("id", employee.id);
+    const res = await fetch(`/api/admin/employees/${employee.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
-    if (updateError) {
-      setError(updateError.message);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "Failed to save");
       setBusy(false);
       return;
     }
+
     setBusy(false);
     onClose();
     router.refresh();
@@ -91,11 +97,13 @@ export default function EditEmployeeForm({
           />
         </div>
       </div>
+
       {isSelf && (
         <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
           You can't change your own role or community assignments here — ask another admin.
         </p>
       )}
+
       <div>
         <label className="block text-[12px] font-semibold text-gray-500 mb-1">Role</label>
         <select
@@ -108,6 +116,7 @@ export default function EditEmployeeForm({
           <option value="admin">Admin</option>
         </select>
       </div>
+
       <div>
         <label className="block text-[12px] font-semibold text-gray-500 mb-1">Communities</label>
         <div className="flex flex-wrap gap-3">
@@ -130,6 +139,35 @@ export default function EditEmployeeForm({
           )}
         </div>
       </div>
+
+      {/* Password reset */}
+      <div className="border-t border-line pt-3">
+        <label className="block text-[12px] font-semibold text-gray-500 mb-1">
+          New password <span className="font-normal text-gray-400">(leave blank to keep current)</span>
+        </label>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Min. 6 characters"
+            className="w-full rounded-lg border px-3 py-2 text-sm pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
+        {newPassword && (
+          <p className="mt-1 text-[11px] text-amber-600">
+            The cleaner will be prompted to change this on next login.
+          </p>
+        )}
+      </div>
+
       <div className="flex gap-2">
         <button
           type="submit"
