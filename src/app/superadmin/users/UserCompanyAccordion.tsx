@@ -29,6 +29,48 @@ export interface CompanyData {
   users: UserData[];
 }
 
+function DeleteButton({ userId }: { userId: string }) {
+  const router = useRouter();
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function handleDelete() {
+    setBusy(true);
+    await fetch(`/api/superadmin/employees/${userId}`, { method: "DELETE" });
+    router.refresh();
+  }
+
+  if (confirming) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-red-600 font-semibold">Sure?</span>
+        <button
+          onClick={handleDelete}
+          disabled={busy}
+          className="text-xs font-semibold text-white bg-red-600 rounded-lg px-2.5 py-1 disabled:opacity-50"
+        >
+          {busy ? "Deleting…" : "Yes, delete"}
+        </button>
+        <button
+          onClick={() => setConfirming(false)}
+          className="text-xs font-semibold text-gray-600 border border-gray-200 rounded-lg px-2.5 py-1"
+        >
+          Cancel
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setConfirming(true)}
+      className="text-xs font-semibold text-red-600 border border-red-200 rounded-lg px-2.5 py-1 hover:bg-red-50 transition-colors"
+    >
+      Delete
+    </button>
+  );
+}
+
 function EditUserPanel({ user, onClose }: { user: UserData; onClose: () => void }) {
   const router = useRouter();
   const [name, setName] = useState(user.name);
@@ -213,7 +255,7 @@ export default function UserCompanyAccordion({ companies }: { companies: Company
                             {emp.email && <p className="text-xs text-muted">{emp.email}</p>}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${ROLE_STYLE[emp.role] ?? "bg-gray-100 text-gray-600"}`}>
                             {emp.role}
                           </span>
@@ -223,6 +265,7 @@ export default function UserCompanyAccordion({ companies }: { companies: Company
                           >
                             {isEditing ? "Cancel" : "Edit"}
                           </button>
+                          <DeleteButton userId={emp.id} />
                         </div>
                       </div>
 

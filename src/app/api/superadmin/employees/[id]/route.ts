@@ -63,3 +63,39 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data: requester } = await supabase
+    .from("employees")
+    .select("role")
+    .eq("auth_user_id", session.user.id)
+    .single();
+  if (requester?.role !== "super_admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const admin = createAdminClient();
+
+  const { data: target } = await admin
+    .from("employees")
+    .select("id, auth_user_id")
+    .eq("id", params.id)
+    .single();
+
+  if (!target) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Delete employee row first (cascade will clean up related data)
+  const { error: empError } = await admin.from("employees").delete().eq("id", params.id);
+  if (empError) return NextResponse.json({ error: empError.message }, { status: 500 });
+
+  // Delete auth user if one exists
+  if (target.auth_user_id) {
+    await admin.auth.admin.deleteUser(target.auth_user_id);
+  }
+
+  return NextResponse.json({ ok: true });
+}
