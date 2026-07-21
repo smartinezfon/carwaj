@@ -110,6 +110,11 @@ const en = {
   edit_cancel: "Cancel",
   edit_status: "Status",
 
+  // Clients page
+  clients_title: "My Clients",
+  clients_new_btn: "+ New Client",
+  clients_empty: "No clients yet. Add your first villa to get started.",
+
   // New client form
   new_client_community: "Community",
   new_client_villa_number: "Villa Number",
@@ -247,6 +252,10 @@ const hi: typeof en = {
   new_client_no_community: "आपको अभी किसी समुदाय में नहीं जोड़ा गया। अपने एडमिन से पूछें।",
   new_client_title: "नया ग्राहक",
 
+  clients_title: "मेरे ग्राहक",
+  clients_new_btn: "+ नया ग्राहक",
+  clients_empty: "अभी कोई ग्राहक नहीं। पहला विला जोड़ें।",
+
   payments_title: "भुगतान",
   payments_pending_tab: "बकाया",
   payments_paid_tab: "भुगतान किया",
@@ -370,6 +379,10 @@ const bn: typeof en = {
   new_client_submit: "ক্লায়েন্ট যোগ করুন",
   new_client_no_community: "আপনাকে এখনও কোনো কমিউনিটিতে যোগ করা হয়নি। আপনার অ্যাডমিনকে জিজ্ঞেস করুন।",
   new_client_title: "নতুন ক্লায়েন্ট",
+
+  clients_title: "আমার ক্লায়েন্ট",
+  clients_new_btn: "+ নতুন ক্লায়েন্ট",
+  clients_empty: "এখনও কোনো ক্লায়েন্ট নেই। প্রথম ভিলা যোগ করুন।",
 
   payments_title: "পেমেন্ট",
   payments_pending_tab: "বকেয়া",
@@ -495,6 +508,10 @@ const ur: typeof en = {
   new_client_no_community: "آپ کو ابھی کسی کمیونٹی میں نہیں جوڑا گیا۔ اپنے ایڈمن سے پوچھیں۔",
   new_client_title: "نیا کلائنٹ",
 
+  clients_title: "میرے کلائنٹس",
+  clients_new_btn: "+ نیا کلائنٹ",
+  clients_empty: "ابھی کوئی کلائنٹ نہیں۔ پہلا ولا شامل کریں۔",
+
   payments_title: "ادائیگیاں",
   payments_pending_tab: "زیر التواء",
   payments_paid_tab: "ادا شدہ",
@@ -618,6 +635,10 @@ const pa: typeof en = {
   new_client_submit: "گاہک پاؤ",
   new_client_no_community: "تہانوں ہنے کسے کمیونٹی وچ نئیں جوڑیا گیا۔ اپنے ایڈمن توں پچھو۔",
   new_client_title: "نواں گاہک",
+
+  clients_title: "میرے گاہک",
+  clients_new_btn: "+ نواں گاہک",
+  clients_empty: "ہنے کوئی گاہک نئیں۔ پہلا ولا پاؤ۔",
 
   payments_title: "ادائیگیاں",
   payments_pending_tab: "باقی",

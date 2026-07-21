@@ -62,6 +62,8 @@ export default function NewClientForm({ communities }: { communities: Community[
   }
 
   return (
+    <>
+    <h1 className="text-xl font-bold">{t("new_client_title")}</h1>
     <form onSubmit={handleSubmit} className="space-y-4 rounded-card bg-white border border-line p-4">
       {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       <div>
@@ -122,5 +124,6 @@ export default function NewClientForm({ communities }: { communities: Community[
         {busy ? t("profile_saving") : t("new_client_submit")}
       </button>
     </form>
+    </>
   );
 }

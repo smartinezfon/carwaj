@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getEmployee } from "@/lib/getEmployee";
-import ClientCard from "./ClientCard";
 import ClientStatusGroups from "./ClientStatusGroups";
+import ClientsHeader from "./ClientsHeader";
 import { localDateStr } from "@/lib/date";
 
 export default async function ClientsPage() {
@@ -61,22 +60,7 @@ export default async function ClientsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">My Clients</h1>
-        <Link
-          href="/cleaner/clients/new"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-        >
-          + New Client
-        </Link>
-      </div>
-
-      {enrichedVillas.length === 0 && (
-        <p className="text-center text-gray-500 py-10">
-          No clients yet. Add your first villa to get started.
-        </p>
-      )}
-
+      <ClientsHeader isEmpty={enrichedVillas.length === 0} />
       <ClientStatusGroups villas={enrichedVillas} />
     </div>
   );
