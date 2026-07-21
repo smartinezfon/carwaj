@@ -21,7 +21,7 @@ export default async function ProfilePage() {
       .in("id", employee.community_ids ?? []),
     supabase
       .from("villas")
-      .select("id, community_id, cars(id), service_subscriptions(price_per_clean, weekdays)")
+      .select("id, community_id, cars(id, service_subscriptions(price_per_clean, weekdays, active))")
       .in("community_id", employee.community_ids ?? []),
   ]);
 
@@ -29,10 +29,12 @@ export default async function ProfilePage() {
     const communityVillas = (villas ?? []).filter((v: any) => v.community_id === community.id);
     const carCount = communityVillas.reduce((sum: number, v: any) => sum + (v.cars?.length ?? 0), 0);
     const monthlyRevenue = communityVillas.reduce((sum: number, v: any) => {
-      const activeSchedules = (v.service_subscriptions ?? []).filter(
-        (s: any) => s.weekdays && s.weekdays.length > 0
-      );
-      return sum + activeSchedules.reduce((s: number, sub: any) => s + Number(sub.price_per_clean), 0);
+      return sum + (v.cars ?? []).reduce((carSum: number, car: any) => {
+        const activeSchedules = (car.service_subscriptions ?? []).filter(
+          (s: any) => s.active && s.weekdays && s.weekdays.length > 0
+        );
+        return carSum + activeSchedules.reduce((s: number, sub: any) => s + Number(sub.price_per_clean), 0);
+      }, 0);
     }, 0);
 
     return {
