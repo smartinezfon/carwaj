@@ -14,22 +14,35 @@ export default async function ProfilePage() {
     return <p className="text-center text-gray-500 py-10">Profile not found.</p>;
   }
 
-  const [{ data: communities }, { data: villas }] = await Promise.all([
+  const [{ data: communities }, { data: villas }, { data: payments }] = await Promise.all([
     supabase
       .from("communities")
       .select("id, name")
       .in("id", employee.community_ids ?? []),
     supabase
       .from("villas")
-      .select("id, community_id, monthly_price, cars(id)")
+      .select("id, community_id, cars(id)")
       .in("community_id", employee.community_ids ?? []),
+    supabase
+      .from("payments")
+      .select("villa_id, amount")
+      .eq("status", "pending")
+      .in("employee_id", [employee.id]),
   ]);
+
+  // Use the first pending payment per villa as the monthly charge
+  const revenueByVillaId = new Map<string, number>();
+  for (const p of payments ?? []) {
+    if (!revenueByVillaId.has(p.villa_id)) {
+      revenueByVillaId.set(p.villa_id, Number(p.amount));
+    }
+  }
 
   const communitySummary = (communities ?? []).map((community) => {
     const communityVillas = (villas ?? []).filter((v: any) => v.community_id === community.id);
     const carCount = communityVillas.reduce((sum: number, v: any) => sum + (v.cars?.length ?? 0), 0);
     const monthlyRevenue = communityVillas.reduce(
-      (sum: number, v: any) => sum + Number(v.monthly_price ?? 0),
+      (sum: number, v: any) => sum + (revenueByVillaId.get(v.id) ?? 0),
       0
     );
 
