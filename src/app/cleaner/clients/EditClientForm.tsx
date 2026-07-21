@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Villa, VillaStatus } from "@/lib/types";
+import { useT } from "@/lib/LanguageContext";
 
-const STATUS_OPTIONS: { value: VillaStatus; label: string; color: string }[] = [
-  { value: "active", label: "Active", color: "bg-green-100 text-green-700" },
-  { value: "paused", label: "Paused", color: "bg-amber-100 text-amber-700" },
-  { value: "former", label: "Former", color: "bg-gray-100 text-gray-500" },
+const STATUS_OPTIONS: { value: VillaStatus; tKey: "status_active" | "status_paused" | "status_former"; color: string }[] = [
+  { value: "active", tKey: "status_active", color: "bg-green-100 text-green-700" },
+  { value: "paused", tKey: "status_paused", color: "bg-amber-100 text-amber-700" },
+  { value: "former", tKey: "status_former", color: "bg-gray-100 text-gray-500" },
 ];
 
 export default function EditClientForm({
@@ -20,6 +21,7 @@ export default function EditClientForm({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useT();
   const [villaNumber, setVillaNumber] = useState(villa.villa_number);
   const [ownerName, setOwnerName] = useState(villa.owner_name);
   const [ownerWhatsapp, setOwnerWhatsapp] = useState(villa.owner_whatsapp);
@@ -60,7 +62,7 @@ export default function EditClientForm({
 
       {/* Status toggle */}
       <div>
-        <label className="block text-xs font-semibold text-gray-500 mb-1.5">Status</label>
+        <label className="block text-xs font-semibold text-gray-500 mb-1.5">{t("edit_status")}</label>
         <div className="flex gap-2">
           {STATUS_OPTIONS.map((opt) => (
             <button
@@ -73,14 +75,14 @@ export default function EditClientForm({
                   : "bg-white border text-gray-400"
               }`}
             >
-              {opt.label}
+              {t(opt.tKey)}
             </button>
           ))}
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-gray-500 mb-1">Villa number</label>
+        <label className="block text-xs font-semibold text-gray-500 mb-1">{t("edit_villa_number")}</label>
         <input
           required
           value={villaNumber}
@@ -89,7 +91,7 @@ export default function EditClientForm({
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold text-gray-500 mb-1">Owner name</label>
+        <label className="block text-xs font-semibold text-gray-500 mb-1">{t("edit_owner_name")}</label>
         <input
           required
           value={ownerName}
@@ -98,7 +100,7 @@ export default function EditClientForm({
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold text-gray-500 mb-1">Owner WhatsApp</label>
+        <label className="block text-xs font-semibold text-gray-500 mb-1">{t("edit_owner_whatsapp")}</label>
         <input
           required
           value={ownerWhatsapp}
@@ -107,7 +109,7 @@ export default function EditClientForm({
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold text-gray-500 mb-1">Notes</label>
+        <label className="block text-xs font-semibold text-gray-500 mb-1">{t("edit_notes")}</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -120,14 +122,14 @@ export default function EditClientForm({
           disabled={busy}
           className="flex-1 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white disabled:opacity-50 min-h-11"
         >
-          {busy ? "Saving..." : "Save"}
+          {busy ? t("profile_saving") : t("edit_save")}
         </button>
         <button
           type="button"
           onClick={onClose}
           className="rounded-lg border px-4 py-2.5 text-sm font-medium text-gray-600 min-h-11"
         >
-          Cancel
+          {t("edit_cancel")}
         </button>
       </div>
     </form>

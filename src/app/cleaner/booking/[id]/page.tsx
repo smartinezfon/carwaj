@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import StatusBadge from "@/components/StatusBadge";
 import type { BookingWithDetails } from "@/lib/types";
 import imageCompression from "browser-image-compression";
+import { useT } from "@/lib/LanguageContext";
 
 type UploadState =
   | { status: "idle" }
@@ -17,6 +18,7 @@ export default function BookingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useT();
   const [booking, setBooking] = useState<BookingWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -117,11 +119,11 @@ export default function BookingDetailPage() {
   }
 
   if (loading) {
-    return <div className="p-6 text-center text-gray-500">Loading...</div>;
+    return <div className="p-6 text-center text-gray-500">{t("booking_loading")}</div>;
   }
 
   if (!booking) {
-    return <div className="p-6 text-center text-gray-500">Job not found.</div>;
+    return <div className="p-6 text-center text-gray-500">{t("booking_not_found")}</div>;
   }
 
   const isUploading =
@@ -133,7 +135,7 @@ export default function BookingDetailPage() {
         onClick={() => router.back()}
         className="text-blue-600 font-medium py-2 -my-2"
       >
-        ← Back
+        {t("booking_back")}
       </button>
 
       <div className="rounded-card bg-white p-5 shadow-sm space-y-2">
@@ -145,12 +147,12 @@ export default function BookingDetailPage() {
           {booking.car.color} {booking.car.make} {booking.car.model}
         </p>
         {booking.car.plate_number && (
-          <p className="text-gray-500 text-sm">Plate: {booking.car.plate_number}</p>
+          <p className="text-gray-500 text-sm">{t("booking_plate")}: {booking.car.plate_number}</p>
         )}
         <p className="text-gray-500 text-sm">
           {booking.scheduled_date} · {booking.scheduled_time_slot}
         </p>
-        <p className="text-gray-500 text-sm">Owner: {booking.villa.owner_name}</p>
+        <p className="text-gray-500 text-sm">{t("booking_owner")}: {booking.villa.owner_name}</p>
       </div>
 
       {booking.status === "scheduled" && (
@@ -168,13 +170,13 @@ export default function BookingDetailPage() {
           onClick={() => updateStatus("in_progress")}
           className="w-full rounded-lg bg-blue-600 py-4 text-lg font-bold text-white disabled:opacity-50"
         >
-          Start Cleaning
+          {t("booking_start_cleaning")}
         </button>
       )}
 
       {booking.status === "in_progress" && (
         <div className="rounded-card bg-white p-5 shadow-sm space-y-3">
-          <h2 className="font-semibold">After photo</h2>
+          <h2 className="font-semibold">{t("booking_after_photo")}</h2>
 
           {/* Photo preview: optimistic local preview while uploading, then confirmed URL */}
           {(previewUrl || booking.after_photo_url) && (
@@ -188,7 +190,7 @@ export default function BookingDetailPage() {
                 <div className="absolute inset-0 rounded-lg bg-black/40 flex flex-col items-center justify-center gap-2">
                   <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
                   <p className="text-white text-sm font-semibold">
-                    {uploadState.status === "compressing" ? "Compressing…" : "Uploading…"}
+                    {uploadState.status === "compressing" ? t("booking_compressing") : t("booking_uploading")}
                   </p>
                 </div>
               )}
@@ -196,7 +198,7 @@ export default function BookingDetailPage() {
           )}
 
           {!previewUrl && !booking.after_photo_url && (
-            <p className="text-sm text-gray-400">No photo yet</p>
+            <p className="text-sm text-gray-400">{t("booking_no_photo")}</p>
           )}
 
           {uploadState.status === "error" && (
@@ -206,7 +208,7 @@ export default function BookingDetailPage() {
                 onClick={() => runUpload(uploadState.file)}
                 className="ml-3 font-semibold underline shrink-0"
               >
-                Retry
+                {t("booking_retry")}
               </button>
             </div>
           )}
@@ -224,7 +226,7 @@ export default function BookingDetailPage() {
             onClick={() => afterInputRef.current?.click()}
             className="w-full rounded-lg border-2 border-gray-300 py-3 font-semibold disabled:opacity-50"
           >
-            {booking.after_photo_url ? "Retake Photo" : "Take After Photo"}
+            {booking.after_photo_url ? t("booking_retake_photo") : t("booking_take_photo")}
           </button>
         </div>
       )}
@@ -235,13 +237,13 @@ export default function BookingDetailPage() {
           onClick={() => updateStatus("completed")}
           className="w-full rounded-lg bg-green-600 py-4 text-lg font-bold text-white disabled:opacity-50"
         >
-          Mark Completed
+          {t("booking_mark_completed")}
         </button>
       )}
 
       {booking.status === "completed" && (
         <p className="text-center text-green-600 font-semibold py-2">
-          ✅ Job completed and client notified
+          {t("booking_job_completed")}
         </p>
       )}
     </div>
@@ -262,6 +264,7 @@ function RescheduleForm({
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(scheduledDate);
   const [timeSlot, setTimeSlot] = useState(scheduledTimeSlot);
+  const { t } = useT();
 
   if (!open) {
     return (
@@ -269,14 +272,14 @@ function RescheduleForm({
         onClick={() => setOpen(true)}
         className="w-full rounded-lg border-2 border-gray-300 py-2.5 text-sm font-semibold text-gray-600"
       >
-        Reschedule this job
+        {t("booking_reschedule")}
       </button>
     );
   }
 
   return (
     <div className="rounded-card bg-white p-4 shadow-sm space-y-3">
-      <h2 className="font-semibold text-sm">Reschedule</h2>
+      <h2 className="font-semibold text-sm">{t("booking_reschedule_title")}</h2>
       <input
         type="date"
         value={date}
@@ -287,7 +290,7 @@ function RescheduleForm({
         type="text"
         value={timeSlot}
         onChange={(e) => setTimeSlot(e.target.value)}
-        placeholder="e.g. 09:00 - 10:00"
+        placeholder={t("booking_time_placeholder")}
         className="w-full rounded-lg border px-3 py-2.5 text-base"
       />
       <div className="flex gap-2">
@@ -299,13 +302,13 @@ function RescheduleForm({
           }}
           className="flex-1 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
         >
-          Save
+          {t("booking_save")}
         </button>
         <button
           onClick={() => setOpen(false)}
           className="rounded-lg border px-4 py-2.5 text-sm font-medium text-gray-600"
         >
-          Cancel
+          {t("booking_cancel")}
         </button>
       </div>
     </div>

@@ -6,8 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { generateUpcomingBookings } from "@/lib/generateBookings";
 import { generateUpcomingPayments } from "@/lib/generatePayments";
 import { localDateStr } from "@/lib/date";
-
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+import { useT } from "@/lib/LanguageContext";
+import { WEEKDAYS_SHORT } from "@/lib/i18n";
 
 export default function AddScheduleForm({
   villaId,
@@ -22,6 +22,8 @@ export default function AddScheduleForm({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const { t, lang } = useT();
+  const WEEKDAY_LABELS = WEEKDAYS_SHORT[lang];
   const [open, setOpen] = useState(false);
   const [weekdays, setWeekdays] = useState<number[]>([1, 3, 5]);
   const [startTime, setStartTime] = useState("07:00");
@@ -39,7 +41,7 @@ export default function AddScheduleForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (weekdays.length === 0) {
-      setError("Pick at least one day");
+      setError(t("schedule_pick_day_error"));
       return;
     }
     setBusy(true);
@@ -104,7 +106,7 @@ export default function AddScheduleForm({
         onClick={() => setOpen(true)}
         className="text-left text-sm text-blue-600 font-semibold py-1.5 min-h-11"
       >
-        + Add schedule
+        {t("schedule_add_btn")}
       </button>
     );
   }
@@ -155,7 +157,7 @@ export default function AddScheduleForm({
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1">First payment due date</p>
+        <p className="text-xs font-semibold text-gray-500 mb-1">{t("schedule_first_payment")}</p>
         <input
           required
           type="date"
@@ -172,14 +174,14 @@ export default function AddScheduleForm({
           disabled={busy}
           className="flex-1 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white disabled:opacity-50 min-h-11"
         >
-          {busy ? "Saving..." : "Save Schedule"}
+          {busy ? t("profile_saving") : t("schedule_save")}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="rounded-lg border px-4 py-2.5 text-sm font-medium text-gray-600 min-h-11"
         >
-          Cancel
+          {t("schedule_cancel")}
         </button>
       </div>
     </form>

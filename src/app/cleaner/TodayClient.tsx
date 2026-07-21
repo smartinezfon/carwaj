@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { CommunityGroup, groupByCommunity, type GroupedBooking } from "@/components/BookingGroups";
+import { useT } from "@/lib/LanguageContext";
+import { MONTHS } from "@/lib/i18n";
 
 function ordinal(n: number) {
   const s = ["th", "st", "nd", "rd"];
@@ -9,10 +11,11 @@ function ordinal(n: number) {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
-function formatDate(dateStr: string) {
+function formatDate(dateStr: string, lang: import("@/lib/i18n").Lang) {
   const d = new Date(`${dateStr}T00:00:00`);
-  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  return `${ordinal(d.getDate())} of ${months[d.getMonth()]} ${d.getFullYear()}`;
+  const months = MONTHS[lang];
+  if (lang === "en") return `${ordinal(d.getDate())} of ${months[d.getMonth()]} ${d.getFullYear()}`;
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function ChevronDown({ open }: { open: boolean }) {
@@ -36,13 +39,14 @@ function Section({
   variant?: "default" | "completed";
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const { t } = useT();
 
   const villaCount = new Set(bookings.map((b) => b.villa.villa_number)).size;
   const communityCount = new Set(bookings.map((b) => b.villa.community?.name ?? "Unassigned")).size;
   const summary = [
-    `${bookings.length} car${bookings.length !== 1 ? "s" : ""}`,
-    `${villaCount} villa${villaCount !== 1 ? "s" : ""}`,
-    communityCount > 1 ? `${communityCount} communities` : null,
+    `${bookings.length} ${t("word_cars")}`,
+    `${villaCount} ${t("word_villas")}`,
+    communityCount > 1 ? `${communityCount} ${t("word_communities")}` : null,
   ].filter(Boolean).join(" · ");
 
   const byCommunity = groupByCommunity(bookings);
@@ -99,6 +103,7 @@ export default function TodayClient({
   bookings: GroupedBooking[];
   today: string;
 }) {
+  const { t, lang } = useT();
   const pending = bookings.filter((b) => b.status !== "completed");
   const completed = bookings.filter((b) => b.status === "completed");
 
@@ -107,7 +112,7 @@ export default function TodayClient({
       {/* Progress header */}
       <div className="rounded-[20px] bg-white border border-[#e6eaef] p-4 flex items-center justify-between shadow-[0_1px_2px_rgba(15,23,42,.05)]">
         <div>
-          <p className="text-[13px] text-[#7b8696]">{formatDate(today)}</p>
+          <p className="text-[13px] text-[#7b8696]">{formatDate(today, lang)}</p>
           <p className="text-[26px] font-extrabold tracking-[-0.03em] mt-0.5 tabular-nums">
             <span className="text-green-600">{completed.length}</span>
             <span className="text-[#cbd2db]"> / </span>
@@ -129,18 +134,18 @@ export default function TodayClient({
         )}
         {bookings.length === 0 && (
           <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-400">
-            No jobs
+            {t("today_no_jobs_badge")}
           </span>
         )}
       </div>
 
       {bookings.length === 0 && (
-        <p className="text-center text-gray-500 py-10">No jobs scheduled for today.</p>
+        <p className="text-center text-gray-500 py-10">{t("today_no_jobs")}</p>
       )}
 
       {pending.length > 0 && (
         <Section
-          title={`To do (${pending.length})`}
+          title={`${t("today_todo")} (${pending.length})`}
           bookings={pending}
           defaultOpen
         />
@@ -148,7 +153,7 @@ export default function TodayClient({
 
       {completed.length > 0 && (
         <Section
-          title={`Completed (${completed.length})`}
+          title={`${t("today_completed")} (${completed.length})`}
           bookings={completed}
           defaultOpen={false}
           variant="completed"

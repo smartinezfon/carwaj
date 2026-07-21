@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ClientCard from "./ClientCard";
+import { useT } from "@/lib/LanguageContext";
 
 type VillaEntry = {
   villa: any;
@@ -14,21 +15,21 @@ type VillaEntry = {
 const STATUS_CONFIG = [
   {
     key: "active" as const,
-    label: "Active",
+    tKey: "status_active" as const,
     dot: "bg-green-500",
     badge: "bg-green-100 text-green-700",
     defaultOpen: true,
   },
   {
     key: "paused" as const,
-    label: "Paused",
+    tKey: "status_paused" as const,
     dot: "bg-amber-400",
     badge: "bg-amber-100 text-amber-700",
     defaultOpen: true,
   },
   {
     key: "former" as const,
-    label: "Former",
+    tKey: "status_former" as const,
     dot: "bg-gray-300",
     badge: "bg-gray-100 text-gray-500",
     defaultOpen: false,
@@ -48,10 +49,11 @@ function ChevronDown({ open }: { open: boolean }) {
 
 function StatusGroup({ config, entries }: { config: typeof STATUS_CONFIG[0]; entries: VillaEntry[] }) {
   const [open, setOpen] = useState(config.defaultOpen);
+  const { t } = useT();
 
   if (entries.length === 0) return null;
 
-  const clientWord = entries.length === 1 ? "client" : "clients";
+  const clientWord = t("word_clients");
 
   return (
     <div className="space-y-2">
@@ -62,7 +64,7 @@ function StatusGroup({ config, entries }: { config: typeof STATUS_CONFIG[0]; ent
       >
         <div className="flex items-center gap-2.5">
           <span className={`w-2 h-2 rounded-full shrink-0 ${config.dot}`} />
-          <span className="font-bold text-[14px]">{config.label}</span>
+          <span className="font-bold text-[14px]">{t(config.tKey)}</span>
         </div>
         <div className="flex items-center gap-2">
           {!open && (

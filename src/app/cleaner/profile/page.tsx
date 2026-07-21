@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getEmployee } from "@/lib/getEmployee";
 import ProfileForm from "./ProfileForm";
+import ProfileSummary from "./ProfileSummary";
 
 export default async function ProfilePage() {
   const supabase = createClient();
@@ -58,31 +59,8 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Profile</h1>
       <ProfileForm employee={employee} />
-
-      <div>
-        <h2 className="text-sm font-semibold text-gray-500 mb-2">My customers by community</h2>
-        {communitySummary.length === 0 && (
-          <p className="text-center text-gray-400 py-6">
-            You're not assigned to any community yet.
-          </p>
-        )}
-        <div className="space-y-2">
-          {communitySummary.map((c) => (
-            <div key={c.id} className="rounded-card bg-white border border-line p-4">
-              <h3 className="font-bold">{c.name}</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {c.villaCount} villa{c.villaCount === 1 ? "" : "s"} · {c.carCount} car
-                {c.carCount === 1 ? "" : "s"}
-              </p>
-              <p className="text-sm text-gray-500 mt-0.5">
-                AED {c.monthlyRevenue.toLocaleString()}/mo
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <ProfileSummary communities={communitySummary} />
     </div>
   );
 }

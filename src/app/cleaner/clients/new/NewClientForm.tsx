@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useT } from "@/lib/LanguageContext";
 
 interface Community {
   id: string;
@@ -12,6 +13,7 @@ interface Community {
 export default function NewClientForm({ communities }: { communities: Community[] }) {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useT();
   const [communityId, setCommunityId] = useState(communities[0]?.id ?? "");
   const [villaNumber, setVillaNumber] = useState("");
   const [ownerName, setOwnerName] = useState("");
@@ -55,9 +57,7 @@ export default function NewClientForm({ communities }: { communities: Community[
 
   if (communities.length === 0) {
     return (
-      <p className="text-sm text-gray-500">
-        You're not assigned to any community yet. Ask your admin to assign you to one.
-      </p>
+      <p className="text-sm text-gray-500">{t("new_client_no_community")}</p>
     );
   }
 
@@ -65,7 +65,7 @@ export default function NewClientForm({ communities }: { communities: Community[
     <form onSubmit={handleSubmit} className="space-y-4 rounded-card bg-white border border-line p-4">
       {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       <div>
-        <label className="block text-sm font-medium mb-1">Community</label>
+        <label className="block text-sm font-medium mb-1">{t("new_client_community")}</label>
         <select
           value={communityId}
           onChange={(e) => setCommunityId(e.target.value)}
@@ -79,7 +79,7 @@ export default function NewClientForm({ communities }: { communities: Community[
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Villa number</label>
+        <label className="block text-sm font-medium mb-1">{t("new_client_villa_number")}</label>
         <input
           required
           value={villaNumber}
@@ -88,7 +88,7 @@ export default function NewClientForm({ communities }: { communities: Community[
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Owner name</label>
+        <label className="block text-sm font-medium mb-1">{t("new_client_owner_name")}</label>
         <input
           required
           value={ownerName}
@@ -97,7 +97,7 @@ export default function NewClientForm({ communities }: { communities: Community[
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Owner WhatsApp</label>
+        <label className="block text-sm font-medium mb-1">{t("new_client_owner_whatsapp")}</label>
         <input
           required
           value={ownerWhatsapp}
@@ -107,7 +107,7 @@ export default function NewClientForm({ communities }: { communities: Community[
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Notes</label>
+        <label className="block text-sm font-medium mb-1">{t("new_client_notes")}</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -119,7 +119,7 @@ export default function NewClientForm({ communities }: { communities: Community[
         disabled={busy}
         className="w-full rounded-lg bg-blue-600 py-3 text-base font-semibold text-white disabled:opacity-50"
       >
-        {busy ? "Saving..." : "Create Client"}
+        {busy ? t("profile_saving") : t("new_client_submit")}
       </button>
     </form>
   );

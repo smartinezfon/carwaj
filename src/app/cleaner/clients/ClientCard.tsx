@@ -8,6 +8,7 @@ import AddScheduleForm from "./AddScheduleForm";
 import ScheduleBadge from "./ScheduleBadge";
 import EditClientForm from "./EditClientForm";
 import PaymentRow from "@/components/PaymentRow";
+import { useT } from "@/lib/LanguageContext";
 
 function daysOverdue(dueDate: string, today: string): number {
   const due = new Date(`${dueDate}T00:00:00`);
@@ -30,6 +31,7 @@ export default function ClientCard({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useT();
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [price, setPrice] = useState<string>(String(villa.monthly_price ?? 0));
@@ -80,11 +82,11 @@ export default function ClientCard({
                 overdue > 0 ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
               }`}
             >
-              {overdue > 0 ? `${overdue}d overdue` : `AED ${pendingPayment.amount} due`}
+              {overdue > 0 ? `${overdue}d ${t("word_overdue")}` : `AED ${pendingPayment.amount} ${t("word_due")}`}
             </span>
           ) : hasAnySchedule ? (
             <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
-              Paid up
+              {t("client_paid_up")}
             </span>
           ) : null}
           <span className={`text-gray-400 transition-transform ${expanded ? "rotate-180" : ""}`}>▾</span>
@@ -100,7 +102,7 @@ export default function ClientCard({
               onClick={() => setEditing((e) => !e)}
               className="text-sm text-blue-600 font-medium"
             >
-              {editing ? "Close" : "Edit"}
+              {editing ? t("client_close") : t("client_edit")}
             </button>
           </div>
 
@@ -111,7 +113,7 @@ export default function ClientCard({
           {/* Cars — each with its own schedule */}
           <div className="space-y-3">
             {cars.length === 0 && (
-              <p className="text-xs text-gray-400">No cars yet</p>
+              <p className="text-xs text-gray-400">{t("client_no_cars")}</p>
             )}
             {cars.map((car: any) => {
               const carSubs = subsByCarId.get(car.id) ?? [];
@@ -157,7 +159,7 @@ export default function ClientCard({
           {/* Payment */}
           {relevantPayment && (
             <div className="border-t pt-3 space-y-2">
-              <p className="text-xs font-semibold text-gray-500 uppercase">Payment</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase">{t("client_payment_section")}</p>
               <PaymentRow
                 key={relevantPayment.id}
                 payment={relevantPayment}
@@ -171,7 +173,7 @@ export default function ClientCard({
           {history.length > 0 && (
             <div className="border-t pt-3">
               <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
-                History ({history.length})
+                {t("client_history")} ({history.length})
               </p>
               <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
                 {history.map((b: any) => (

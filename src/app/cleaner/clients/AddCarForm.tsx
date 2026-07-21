@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CAR_CATALOG, CAR_MAKES } from "@/lib/carCatalog";
+import { useT } from "@/lib/LanguageContext";
 
 export default function AddCarForm({ villaId }: { villaId: string }) {
   const router = useRouter();
@@ -42,13 +43,15 @@ export default function AddCarForm({ villaId }: { villaId: string }) {
     router.refresh();
   }
 
+  const { t } = useT();
+
   if (!open) {
     return (
       <button
         onClick={() => setOpen(true)}
         className="text-left text-sm text-blue-600 font-semibold py-2.5 min-h-11"
       >
-        + Add car
+        {t("client_add_car")}
       </button>
     );
   }
@@ -82,7 +85,7 @@ export default function AddCarForm({ villaId }: { villaId: string }) {
       {model === "Other" && (
         <input
           required
-          placeholder="Model name"
+          placeholder={t("client_model_placeholder")}
           value={customModel}
           onChange={(e) => setCustomModel(e.target.value)}
           className="w-full rounded border px-2 py-2.5 text-sm min-h-11"
@@ -90,13 +93,13 @@ export default function AddCarForm({ villaId }: { villaId: string }) {
       )}
       <div className="grid grid-cols-2 gap-2">
         <input
-          placeholder="Color"
+          placeholder={t("client_color_placeholder")}
           value={color}
           onChange={(e) => setColor(e.target.value)}
           className="rounded border px-2 py-2.5 text-sm min-h-11"
         />
         <input
-          placeholder="Plate number"
+          placeholder={t("client_plate_placeholder")}
           value={plateNumber}
           onChange={(e) => setPlateNumber(e.target.value)}
           className="rounded border px-2 py-2.5 text-sm min-h-11"
@@ -108,14 +111,14 @@ export default function AddCarForm({ villaId }: { villaId: string }) {
           disabled={busy}
           className="flex-1 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white disabled:opacity-50 min-h-11"
         >
-          Save Car
+          {t("client_add_car_save")}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="rounded-lg border px-4 py-2.5 text-sm font-medium text-gray-600 min-h-11"
         >
-          Cancel
+          {t("client_cancel")}
         </button>
       </div>
     </form>

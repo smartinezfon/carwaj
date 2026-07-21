@@ -4,9 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { localDateStr } from "@/lib/date";
 import { CommunityGroup, groupByCommunity, type GroupedBooking } from "@/components/BookingGroups";
-
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTH_LABELS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+import { useT } from "@/lib/LanguageContext";
+import { MONTHS, WEEKDAYS_SHORT } from "@/lib/i18n";
 
 const STATUS_DOT: Record<string, string> = {
   scheduled: "bg-yellow-500",
@@ -22,6 +21,9 @@ function ordinal(n: number) {
 }
 
 export default function CalendarView({ employeeId }: { employeeId: string }) {
+  const { lang } = useT();
+  const WEEKDAY_LABELS = WEEKDAYS_SHORT[lang];
+  const MONTH_LABELS = MONTHS[lang];
   const today = useMemo(() => new Date(), []);
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState(localDateStr(today));
@@ -74,7 +76,9 @@ export default function CalendarView({ employeeId }: { employeeId: string }) {
   const byCommunity = useMemo(() => groupByCommunity(selectedBookings), [selectedBookings]);
 
   const d = new Date(`${selectedDate}T00:00:00`);
-  const selectedLabel = `${WEEKDAY_LABELS[d.getDay()]}, ${ordinal(d.getDate())} ${MONTH_LABELS[d.getMonth()]}`;
+  const selectedLabel = lang === "en"
+    ? `${WEEKDAY_LABELS[d.getDay()]}, ${ordinal(d.getDate())} ${MONTH_LABELS[d.getMonth()]}`
+    : `${WEEKDAY_LABELS[d.getDay()]} ${d.getDate()} ${MONTH_LABELS[d.getMonth()]}`;
 
   return (
     <div className="space-y-4">

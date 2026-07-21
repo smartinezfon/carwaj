@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useT } from "@/lib/LanguageContext";
 
 const ICONS: Record<string, (color: string) => React.ReactNode> = {
   today: (c) => (
@@ -59,11 +60,12 @@ export default function CleanerNav() {
     });
   }, [supabase]);
 
+  const { t } = useT();
   const tabs = [
-    { href: "/cleaner", label: "Today", icon: "today" },
-    { href: "/cleaner/calendar", label: "Calendar", icon: "calendar" },
-    { href: "/cleaner/clients", label: "Clients", icon: "clients" },
-    { href: "/cleaner/payments", label: "Payments", icon: "history" },
+    { href: "/cleaner", label: t("nav_today"), icon: "today" },
+    { href: "/cleaner/calendar", label: t("nav_calendar"), icon: "calendar" },
+    { href: "/cleaner/clients", label: t("nav_clients"), icon: "clients" },
+    { href: "/cleaner/payments", label: t("nav_payments"), icon: "history" },
   ];
 
   return (
