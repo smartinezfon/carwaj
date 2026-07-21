@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Employee } from "@/lib/types";
 import { useT } from "@/lib/LanguageContext";
-import { LANG_REGIONS, type Lang } from "@/lib/i18n";
+import { LANG_NAMES, type Lang } from "@/lib/i18n";
 
-const LANGS = Object.entries(LANG_REGIONS) as [Lang, string][];
+const LANGS = Object.entries(LANG_NAMES) as [Lang, string][];
 
 export default function ProfileForm({ employee }: { employee: Employee }) {
   const router = useRouter();
