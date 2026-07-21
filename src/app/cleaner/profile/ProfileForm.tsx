@@ -82,6 +82,14 @@ export default function ProfileForm({ employee }: { employee: Employee }) {
           {t("profile_logout")}
         </button>
       </form>
+
+      <button
+        type="button"
+        onClick={() => window.dispatchEvent(new Event("carwaj:startGuide"))}
+        className="w-full rounded-card border border-line bg-white py-3 text-sm font-medium text-gray-500 min-h-11"
+      >
+        {t("guide_show_again")}
+      </button>
     </div>
   );
 }

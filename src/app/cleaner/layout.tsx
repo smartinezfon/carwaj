@@ -1,5 +1,7 @@
 import CleanerNav from "@/components/CleanerNav";
 import InstallPrompt from "@/components/InstallPrompt";
+import WalkthroughOverlay from "@/components/WalkthroughOverlay";
+import FirstRunFlow from "@/components/FirstRunFlow";
 import { LanguageProvider } from "@/lib/LanguageContext";
 
 export default function CleanerLayout({ children }: { children: React.ReactNode }) {
@@ -11,6 +13,8 @@ export default function CleanerLayout({ children }: { children: React.ReactNode 
         <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+64px)] left-0 right-0 max-w-md mx-auto z-20">
           <InstallPrompt />
         </div>
+        <WalkthroughOverlay />
+        <FirstRunFlow />
       </div>
     </LanguageProvider>
   );

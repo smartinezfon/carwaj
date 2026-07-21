@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/LanguageContext";
 
 type Platform = "android" | "ios" | "other";
 
@@ -20,6 +21,7 @@ function isInStandaloneMode() {
 }
 
 export default function InstallPrompt() {
+  const { t } = useT();
   const [show, setShow] = useState(false);
   const [platform, setPlatform] = useState<Platform>("other");
   const [showIOSSteps, setShowIOSSteps] = useState(false);
@@ -27,7 +29,7 @@ export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
-    if (isInStandaloneMode()) return; // already installed
+    if (isInStandaloneMode()) return;
     if (sessionStorage.getItem("install-dismissed")) return;
 
     const p = getPlatform();
@@ -68,13 +70,15 @@ export default function InstallPrompt() {
     <div className="mx-4 mb-3 rounded-[14px] bg-blue-600 text-white shadow-lg overflow-hidden">
       {platform === "ios" && showIOSSteps ? (
         <div className="px-4 py-3.5 space-y-2">
-          <p className="text-[13px] font-bold">Add Carwaj to your Home Screen:</p>
+          <p className="text-[13px] font-bold">{t("install_ios_title")}</p>
           <ol className="text-[12.5px] space-y-1 list-decimal list-inside opacity-90">
-            <li>Tap the <strong>Share</strong> button <span className="font-mono">⎙</span> at the bottom of Safari</li>
-            <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
-            <li>Tap <strong>Add</strong> in the top right</li>
+            <li>{t("install_ios_step1")}</li>
+            <li>{t("install_ios_step2")}</li>
+            <li>{t("install_ios_step3")}</li>
           </ol>
-          <button onClick={dismiss} className="mt-1 text-[12px] underline opacity-75">Dismiss</button>
+          <button onClick={dismiss} className="mt-1 text-[12px] underline opacity-75">
+            {t("install_dismiss")}
+          </button>
         </div>
       ) : (
         <div className="flex items-center gap-3 px-4 py-3">
@@ -87,8 +91,8 @@ export default function InstallPrompt() {
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-bold leading-tight">Install Carwaj</p>
-            <p className="text-[11.5px] opacity-75 leading-tight mt-0.5">Add to your home screen for quick access</p>
+            <p className="text-[13px] font-bold leading-tight">{t("install_title")}</p>
+            <p className="text-[11.5px] opacity-75 leading-tight mt-0.5">{t("install_subtitle")}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {platform === "android" ? (
@@ -96,14 +100,14 @@ export default function InstallPrompt() {
                 onClick={install}
                 className="bg-white text-blue-600 text-[12.5px] font-bold px-3 py-1.5 rounded-full"
               >
-                Install
+                {t("install_btn")}
               </button>
             ) : platform === "ios" ? (
               <button
                 onClick={() => setShowIOSSteps(true)}
                 className="bg-white text-blue-600 text-[12.5px] font-bold px-3 py-1.5 rounded-full"
               >
-                How?
+                {t("install_how")}
               </button>
             ) : null}
             <button onClick={dismiss} className="opacity-60 p-1">

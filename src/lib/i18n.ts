@@ -52,6 +52,7 @@ const en = {
   profile_language: "Language",
   profile_customers_title: "My customers by community",
   profile_no_community: "You're not assigned to any community yet.",
+  guide_show_again: "Show app guide",
 
   // Status labels
   status_active: "Active",
@@ -180,6 +181,30 @@ const en = {
   booking_retry: "Retry",
   booking_loading: "Loading...",
   booking_not_found: "Job not found.",
+
+  guide_step1_title: "Today's jobs",
+  guide_step1_body: "See what you need to clean today. Tap a card to start a job, upload your after photo, and mark it done.",
+  guide_step2_title: "Calendar",
+  guide_step2_body: "Your monthly schedule. Tap any date to see what's booked for that day.",
+  guide_step3_title: "My Clients",
+  guide_step3_body: "All your clients. Expand a card to see their cars, cleaning schedule, and payment history.",
+  guide_step4_title: "Payments",
+  guide_step4_body: "Track what's owed and what's been collected. Tap a payment to mark it as received.",
+  guide_step5_title: "Profile & settings",
+  guide_step5_body: "Change your language, update your name, or log out. Tap your initials in the top corner any time.",
+  guide_next: "Next",
+  guide_done: "Done",
+  guide_skip: "Skip",
+
+  install_title: "Install Carwaj",
+  install_subtitle: "Add to your home screen for quick access",
+  install_btn: "Install",
+  install_how: "How?",
+  install_ios_title: "Add Carwaj to your Home Screen:",
+  install_ios_step1: "Tap the Share button ⎙ at the bottom of Safari",
+  install_ios_step2: "Scroll down and tap \"Add to Home Screen\"",
+  install_ios_step3: "Tap Add in the top right",
+  install_dismiss: "Dismiss",
 };
 
 const hi: typeof en = {
@@ -198,6 +223,7 @@ const hi: typeof en = {
   profile_language: "भाषा",
   profile_customers_title: "समुदाय के अनुसार मेरे ग्राहक",
   profile_no_community: "आपको अभी किसी समुदाय में नहीं जोड़ा गया।",
+  guide_show_again: "ऐप गाइड दिखाएं",
 
   status_active: "सक्रिय",
   status_paused: "रोका हुआ",
@@ -315,6 +341,30 @@ const hi: typeof en = {
   booking_retry: "पुनः प्रयास",
   booking_loading: "लोड हो रहा है...",
   booking_not_found: "काम नहीं मिला।",
+
+  guide_step1_title: "आज के काम",
+  guide_step1_body: "देखें आज क्या साफ करना है। काम शुरू करने के लिए कार्ड पर टैप करें, बाद की फोटो अपलोड करें और पूरा करें।",
+  guide_step2_title: "कैलेंडर",
+  guide_step2_body: "अपना मासिक शेड्यूल देखें। किसी भी दिन की बुकिंग देखने के लिए उस दिन पर टैप करें।",
+  guide_step3_title: "मेरे ग्राहक",
+  guide_step3_body: "सभी ग्राहक यहाँ हैं। कार्ड खोलें और उनकी गाड़ियाँ, शेड्यूल और भुगतान देखें।",
+  guide_step4_title: "भुगतान",
+  guide_step4_body: "देखें क्या बकाया है और क्या मिल चुका है। भुगतान मिलने पर उसे यहाँ मार्क करें।",
+  guide_step5_title: "प्रोफ़ाइल और सेटिंग",
+  guide_step5_body: "भाषा बदलें, नाम अपडेट करें या लॉग आउट करें। ऊपर कोने में अपनी पहचान पर टैप करें।",
+  guide_next: "अगला",
+  guide_done: "हो गया",
+  guide_skip: "छोड़ें",
+
+  install_title: "Carwaj इंस्टॉल करें",
+  install_subtitle: "होम स्क्रीन पर जोड़ें",
+  install_btn: "इंस्टॉल",
+  install_how: "कैसे?",
+  install_ios_title: "Carwaj को Home Screen पर जोड़ें:",
+  install_ios_step1: "Safari के नीचे Share बटन ⎙ पर टैप करें",
+  install_ios_step2: "नीचे स्क्रॉल करें और \"Add to Home Screen\" पर टैप करें",
+  install_ios_step3: "ऊपर दाईं तरफ Add पर टैप करें",
+  install_dismiss: "बंद करें",
 };
 
 const bn: typeof en = {
@@ -333,6 +383,7 @@ const bn: typeof en = {
   profile_language: "ভাষা",
   profile_customers_title: "কমিউনিটি অনুযায়ী আমার ক্লায়েন্ট",
   profile_no_community: "আপনাকে এখনও কোনো কমিউনিটিতে যোগ করা হয়নি।",
+  guide_show_again: "অ্যাপ গাইড দেখুন",
 
   status_active: "সক্রিয়",
   status_paused: "বিরতি",
@@ -450,6 +501,30 @@ const bn: typeof en = {
   booking_retry: "আবার চেষ্টা করুন",
   booking_loading: "লোড হচ্ছে...",
   booking_not_found: "কাজ পাওয়া যায়নি।",
+
+  guide_step1_title: "আজকের কাজ",
+  guide_step1_body: "আজ কী পরিষ্কার করতে হবে দেখুন। কাজ শুরু করতে কার্ডে ট্যাপ করুন, ছবি আপলোড করুন এবং সম্পন্ন করুন।",
+  guide_step2_title: "ক্যালেন্ডার",
+  guide_step2_body: "আপনার মাসিক সময়সূচী। যেকোনো দিনের বুকিং দেখতে সেই দিনে ট্যাপ করুন।",
+  guide_step3_title: "আমার ক্লায়েন্ট",
+  guide_step3_body: "সব ক্লায়েন্ট এখানে। কার্ড খুলুন এবং তাদের গাড়ি, শিডিউল ও পেমেন্ট দেখুন।",
+  guide_step4_title: "পেমেন্ট",
+  guide_step4_body: "বকেয়া ও সংগ্রহ ট্র্যাক করুন। পেমেন্ট পেলে এখানে মার্ক করুন।",
+  guide_step5_title: "প্রোফাইল ও সেটিংস",
+  guide_step5_body: "ভাষা পরিবর্তন করুন, নাম আপডেট করুন বা লগ আউট করুন। যেকোনো সময় উপরের কোণে আপনার আদ্যাক্ষরে ট্যাপ করুন।",
+  guide_next: "পরবর্তী",
+  guide_done: "সম্পন্ন",
+  guide_skip: "এড়িয়ে যান",
+
+  install_title: "Carwaj ইনস্টল করুন",
+  install_subtitle: "হোম স্ক্রিনে যোগ করুন",
+  install_btn: "ইনস্টল",
+  install_how: "কীভাবে?",
+  install_ios_title: "Carwaj হোম স্ক্রিনে যোগ করুন:",
+  install_ios_step1: "Safari-এর নিচে Share বাটন ⎙ ট্যাপ করুন",
+  install_ios_step2: "নিচে স্ক্রোল করুন এবং \"Add to Home Screen\" ট্যাপ করুন",
+  install_ios_step3: "উপরের ডানে Add ট্যাপ করুন",
+  install_dismiss: "বন্ধ করুন",
 };
 
 const ur: typeof en = {
@@ -468,6 +543,7 @@ const ur: typeof en = {
   profile_language: "زبان",
   profile_customers_title: "کمیونٹی کے مطابق میرے کلائنٹس",
   profile_no_community: "آپ کو ابھی کسی کمیونٹی میں نہیں جوڑا گیا۔",
+  guide_show_again: "ایپ گائیڈ دکھائیں",
 
   status_active: "فعال",
   status_paused: "رکا ہوا",
@@ -585,6 +661,30 @@ const ur: typeof en = {
   booking_retry: "دوبارہ کوشش کریں",
   booking_loading: "لوڈ ہو رہا ہے...",
   booking_not_found: "کام نہیں ملا۔",
+
+  guide_step1_title: "آج کے کام",
+  guide_step1_body: "دیکھیں آج کیا صاف کرنا ہے۔ کام شروع کرنے کے لیے کارڈ پر ٹیپ کریں، تصویر اپلوڈ کریں اور مکمل کریں۔",
+  guide_step2_title: "کیلنڈر",
+  guide_step2_body: "اپنا ماہانہ شیڈول دیکھیں۔ کسی بھی دن کی بکنگ دیکھنے کے لیے اس دن پر ٹیپ کریں۔",
+  guide_step3_title: "میرے کلائنٹس",
+  guide_step3_body: "تمام کلائنٹس یہاں ہیں۔ کارڈ کھولیں اور ان کی گاڑیاں، شیڈول اور ادائیگی دیکھیں۔",
+  guide_step4_title: "ادائیگیاں",
+  guide_step4_body: "دیکھیں کیا واجب ہے اور کیا مل چکا ہے۔ ادائیگی ملنے پر یہاں نشان لگائیں۔",
+  guide_step5_title: "پروفائل اور سیٹنگز",
+  guide_step5_body: "زبان تبدیل کریں، نام اپڈیٹ کریں یا لاگ آؤٹ کریں۔ اوپر کونے میں اپنے حروف پر ٹیپ کریں۔",
+  guide_next: "اگلا",
+  guide_done: "مکمل",
+  guide_skip: "چھوڑیں",
+
+  install_title: "Carwaj انسٹال کریں",
+  install_subtitle: "ہوم اسکرین پر شامل کریں",
+  install_btn: "انسٹال",
+  install_how: "کیسے؟",
+  install_ios_title: "Carwaj کو ہوم اسکرین پر شامل کریں:",
+  install_ios_step1: "Safari کے نیچے Share بٹن ⎙ پر ٹیپ کریں",
+  install_ios_step2: "نیچے اسکرول کریں اور \"Add to Home Screen\" پر ٹیپ کریں",
+  install_ios_step3: "اوپر دائیں جانب Add پر ٹیپ کریں",
+  install_dismiss: "بند کریں",
 };
 
 const pa: typeof en = {
@@ -603,6 +703,7 @@ const pa: typeof en = {
   profile_language: "بولی",
   profile_customers_title: "کمیونٹی مطابق میرے گاہک",
   profile_no_community: "تہانوں ہنے کسے کمیونٹی وچ نئیں جوڑیا گیا۔",
+  guide_show_again: "ایپ گائیڈ وکھاؤ",
 
   status_active: "چالو",
   status_paused: "رکیا ہویا",
@@ -720,6 +821,30 @@ const pa: typeof en = {
   booking_retry: "دوبارہ کوشش کرو",
   booking_loading: "لوڈ ہو رہیا اے...",
   booking_not_found: "کم نئیں ملیا۔",
+
+  guide_step1_title: "اج دے کم",
+  guide_step1_body: "ویکھو اج کی صاف کرنا اے۔ کم شروع کرن لئی کارڈ تے ٹیپ کرو، تصویر اپلوڈ کرو تے مکمل کرو۔",
+  guide_step2_title: "کیلنڈر",
+  guide_step2_body: "اپنا ماہانہ شیڈول ویکھو۔ کسے وی دن دی بکنگ ویکھن لئی اس دن تے ٹیپ کرو۔",
+  guide_step3_title: "میرے گاہک",
+  guide_step3_body: "سارے گاہک ایتھے نیں۔ کارڈ کھولو تے اوہناں دیاں گاڑیاں، شیڈول تے ادائیگی ویکھو۔",
+  guide_step4_title: "ادائیگیاں",
+  guide_step4_body: "ویکھو کی باقی اے تے کی مل گیا اے۔ ادائیگی ملن تے ایتھے نشان لاؤ۔",
+  guide_step5_title: "پروفائل تے سیٹنگز",
+  guide_step5_body: "بولی بدلو، ناں اپڈیٹ کرو یا لاگ آؤٹ کرو۔ اتے کونے وچ اپنے حروف تے ٹیپ کرو۔",
+  guide_next: "اگلا",
+  guide_done: "مکمل",
+  guide_skip: "چھڈو",
+
+  install_title: "Carwaj انسٹال کرو",
+  install_subtitle: "ہوم اسکرین تے شامل کرو",
+  install_btn: "انسٹال",
+  install_how: "کویں؟",
+  install_ios_title: "Carwaj نوں ہوم اسکرین تے شامل کرو:",
+  install_ios_step1: "Safari دے تھلے Share بٹن ⎙ تے ٹیپ کرو",
+  install_ios_step2: "تھلے سکرول کرو تے \"Add to Home Screen\" تے ٹیپ کرو",
+  install_ios_step3: "اتے سجے پاسے Add تے ٹیپ کرو",
+  install_dismiss: "بند کرو",
 };
 
 export const translations: Record<Lang, typeof en> = { en, hi, bn, ur, pa };

@@ -87,6 +87,7 @@ export default function CleanerNav() {
           {/* Avatar → profile */}
           <Link
             href="/cleaner/profile"
+            data-guide="profile"
             className="w-8 h-8 rounded-full bg-[#dfe7f5] text-blue-600 flex items-center justify-center font-extrabold text-sm select-none"
           >
             {initial}
@@ -102,6 +103,7 @@ export default function CleanerNav() {
             <Link
               key={tab.href}
               href={tab.href}
+              data-guide={tab.icon}
               className="flex-1 flex flex-col items-center gap-[3px] py-1 min-h-11"
             >
               {ICONS[tab.icon](color)}

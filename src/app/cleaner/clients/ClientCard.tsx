@@ -101,14 +101,19 @@ export default function ClientCard({
             </span>
           )}
 
-          {/* Amount — always visible if set */}
+          {/* Amount — colour matches villa status */}
           {(() => {
             const amt = villa.monthly_price || pendingPayment?.amount;
-            return amt ? (
-              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
+            if (!amt) return null;
+            const amtStyle =
+              villa.status === "paused"  ? "bg-yellow-100 text-yellow-700" :
+              villa.status === "former"  ? "bg-gray-100 text-gray-500"     :
+                                           "bg-green-100 text-green-700";
+            return (
+              <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${amtStyle}`}>
                 AED {amt}/mo
               </span>
-            ) : null;
+            );
           })()}
 
           <span className={`text-gray-400 transition-transform ${expanded ? "rotate-180" : ""}`}>▾</span>
