@@ -21,33 +21,17 @@ export default async function ProfilePage() {
       .in("id", employee.community_ids ?? []),
     supabase
       .from("villas")
-      .select("id, community_id, cars(id)")
+      .select("id, community_id, monthly_price, cars(id)")
       .in("community_id", employee.community_ids ?? []),
   ]);
-
-  const villaIds = (villas ?? []).map((v: any) => v.id);
-  const { data: subscriptions } = villaIds.length > 0
-    ? await supabase
-        .from("service_subscriptions")
-        .select("villa_id, price_per_clean, weekdays, active")
-        .in("villa_id", villaIds)
-    : { data: [] };
-
-  const subsByVillaId = new Map<string, any[]>();
-  for (const sub of subscriptions ?? []) {
-    const list = subsByVillaId.get(sub.villa_id) ?? [];
-    list.push(sub);
-    subsByVillaId.set(sub.villa_id, list);
-  }
 
   const communitySummary = (communities ?? []).map((community) => {
     const communityVillas = (villas ?? []).filter((v: any) => v.community_id === community.id);
     const carCount = communityVillas.reduce((sum: number, v: any) => sum + (v.cars?.length ?? 0), 0);
-    const monthlyRevenue = communityVillas.reduce((sum: number, v: any) => {
-      const villaSubs = subsByVillaId.get(v.id) ?? [];
-      const activeSubs = villaSubs.filter((s: any) => s.weekdays && s.weekdays.length > 0);
-      return sum + activeSubs.reduce((s: number, sub: any) => s + Number(sub.price_per_clean), 0);
-    }, 0);
+    const monthlyRevenue = communityVillas.reduce(
+      (sum: number, v: any) => sum + Number(v.monthly_price ?? 0),
+      0
+    );
 
     return {
       id: community.id,
