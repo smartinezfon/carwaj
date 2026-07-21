@@ -6,6 +6,7 @@ export type PaymentStatus = "pending" | "paid";
 
 export interface Community {
   id: string;
+  company_id: string;
   name: string;
   location_description: string | null;
   created_at: string;
@@ -19,6 +20,7 @@ export interface Villa {
   owner_whatsapp: string;
   notes: string | null;
   status: VillaStatus;
+  monthly_price: number;
   created_at: string;
 }
 
@@ -35,6 +37,7 @@ export interface Car {
 export interface Employee {
   id: string;
   auth_user_id: string | null;
+  company_id: string | null;
   name: string;
   whatsapp_number: string | null;
   role: Role;
@@ -46,6 +49,7 @@ export interface Employee {
 export interface ServiceSubscription {
   id: string;
   villa_id: string;
+  car_id: string | null;
   frequency: SubscriptionFrequency;
   day_of_week: number | null;
   next_clean_date: string | null;
