@@ -27,7 +27,8 @@ export default async function ProfilePage() {
       .from("payments")
       .select("villa_id, amount")
       .eq("status", "pending")
-      .in("employee_id", [employee.id]),
+      .eq("employee_id", employee.id)
+      .order("due_date", { ascending: false }),
   ]);
 
   // Use the first pending payment per villa as the monthly charge
