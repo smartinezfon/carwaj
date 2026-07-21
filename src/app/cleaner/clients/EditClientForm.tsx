@@ -26,6 +26,7 @@ export default function EditClientForm({
   const [ownerName, setOwnerName] = useState(villa.owner_name);
   const [ownerWhatsapp, setOwnerWhatsapp] = useState(villa.owner_whatsapp);
   const [notes, setNotes] = useState(villa.notes ?? "");
+  const [monthlyPrice, setMonthlyPrice] = useState(villa.monthly_price != null ? String(villa.monthly_price) : "");
   const [status, setStatus] = useState<VillaStatus>(villa.status ?? "active");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -42,6 +43,7 @@ export default function EditClientForm({
         owner_name: ownerName,
         owner_whatsapp: ownerWhatsapp,
         notes: notes || null,
+        monthly_price: monthlyPrice ? Number(monthlyPrice) : null,
         status,
       })
       .eq("id", villa.id);
@@ -107,6 +109,20 @@ export default function EditClientForm({
           onChange={(e) => setOwnerWhatsapp(e.target.value)}
           className="w-full rounded border px-2 py-2.5 text-sm min-h-11"
         />
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-gray-500 mb-1">{t("edit_amount")}</label>
+        <div className="flex items-center rounded border overflow-hidden bg-white">
+          <span className="px-2.5 py-2.5 text-sm text-gray-500 bg-gray-50 border-r">AED</span>
+          <input
+            type="number"
+            min="0"
+            value={monthlyPrice}
+            onChange={(e) => setMonthlyPrice(e.target.value)}
+            placeholder="0"
+            className="flex-1 px-2 py-2.5 text-sm min-h-11 outline-none"
+          />
+        </div>
       </div>
       <div>
         <label className="block text-xs font-semibold text-gray-500 mb-1">{t("edit_notes")}</label>

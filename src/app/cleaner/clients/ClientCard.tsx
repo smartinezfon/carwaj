@@ -63,6 +63,14 @@ export default function ClientCard({
     (s: any) => s.weekdays && s.weekdays.length > 0
   );
 
+  // Onboarding state
+  const now = new Date().toISOString();
+  const hasOnboarding = !!villa.onboarding_expires_at;
+  const onboardingSubmitted = !!villa.onboarding_submitted_at;
+  const onboardingExpired = hasOnboarding && villa.onboarding_expires_at < now;
+  const onboardingPending = hasOnboarding && !onboardingSubmitted && !onboardingExpired;
+  const onboardingExpiredUnsubmitted = hasOnboarding && !onboardingSubmitted && onboardingExpired;
+
   return (
     <div className="rounded-card bg-white border border-line overflow-hidden">
       <button
@@ -75,20 +83,34 @@ export default function ClientCard({
           </h2>
           <p className="text-sm text-gray-500 truncate">{villa.owner_name}</p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {pendingPayment ? (
-            <span
-              className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                overdue > 0 ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
-              }`}
-            >
-              {overdue > 0 ? `${overdue}d ${t("word_overdue")}` : `AED ${pendingPayment.amount} ${t("word_due")}`}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Onboarding badge */}
+          {onboardingPending && (
+            <span className="rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-700">
+              ⏳ {t("onboarding_awaiting")}
             </span>
-          ) : hasAnySchedule ? (
+          )}
+          {onboardingSubmitted && history.length === 0 && (
             <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
-              {t("client_paid_up")}
+              ✓ {t("onboarding_received")}
             </span>
-          ) : null}
+          )}
+          {onboardingExpiredUnsubmitted && (
+            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
+              {t("onboarding_add_details")}
+            </span>
+          )}
+
+          {/* Amount — always visible if set */}
+          {(() => {
+            const amt = villa.monthly_price || pendingPayment?.amount;
+            return amt ? (
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
+                AED {amt}/mo
+              </span>
+            ) : null;
+          })()}
+
           <span className={`text-gray-400 transition-transform ${expanded ? "rotate-180" : ""}`}>▾</span>
         </div>
       </button>
@@ -108,6 +130,12 @@ export default function ClientCard({
 
           {editing && (
             <EditClientForm villa={villa} onClose={() => setEditing(false)} />
+          )}
+
+          {onboardingExpiredUnsubmitted && (
+            <p className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800">
+              {t("onboarding_expired_msg")}
+            </p>
           )}
 
           {/* Cars — each with its own schedule */}

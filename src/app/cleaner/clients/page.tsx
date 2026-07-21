@@ -50,13 +50,25 @@ export default async function ClientsPage() {
     historyByVilla.set(villaId, list);
   });
 
-  const enrichedVillas = (villas ?? []).map((villa: any) => ({
-    villa,
-    employeeId: employee?.id ?? "",
-    payments: paymentsByVilla.get(villa.id) ?? [],
-    history: historyByVilla.get(villa.id) ?? [],
-    today,
-  }));
+  const STATUS_ORDER: Record<string, number> = { active: 0, paused: 1, former: 2 };
+
+  const enrichedVillas = (villas ?? [])
+    .map((villa: any) => ({
+      villa,
+      employeeId: employee?.id ?? "",
+      payments: paymentsByVilla.get(villa.id) ?? [],
+      history: historyByVilla.get(villa.id) ?? [],
+      today,
+    }))
+    .sort((a, b) => {
+      const statusA = STATUS_ORDER[a.villa.status ?? "active"] ?? 0;
+      const statusB = STATUS_ORDER[b.villa.status ?? "active"] ?? 0;
+      if (statusA !== statusB) return statusA - statusB;
+      const commA = (a.villa.community?.name ?? "").toLowerCase();
+      const commB = (b.villa.community?.name ?? "").toLowerCase();
+      if (commA !== commB) return commA.localeCompare(commB);
+      return (parseInt(a.villa.villa_number) || 0) - (parseInt(b.villa.villa_number) || 0);
+    });
 
   return (
     <div className="space-y-4">

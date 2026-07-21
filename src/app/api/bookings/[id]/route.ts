@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { notifyCarCleaned } from "@/lib/whatsapp";
 import { slackJobCompleted } from "@/lib/slack";
+import { generateUpcomingPayments } from "@/lib/generatePayments";
 import type { BookingStatus } from "@/lib/types";
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
@@ -45,6 +46,33 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 
   if (status === "completed") {
+    // Auto-generate first payment if this subscription has none yet (onboarding flow)
+    if (booking.subscription_id && booking.employee_id) {
+      const { count } = await supabase
+        .from("payments")
+        .select("id", { count: "exact", head: true })
+        .eq("subscription_id", booking.subscription_id);
+
+      if (count === 0) {
+        const { data: sub } = await supabase
+          .from("service_subscriptions")
+          .select("price_per_clean, villa_id")
+          .eq("id", booking.subscription_id)
+          .single();
+
+        if (sub) {
+          const payments = generateUpcomingPayments({
+            villaId: sub.villa_id,
+            employeeId: booking.employee_id,
+            subscriptionId: booking.subscription_id,
+            amount: sub.price_per_clean,
+            firstPaymentDate: booking.scheduled_date,
+          });
+          await supabase.from("payments").insert(payments);
+        }
+      }
+    }
+
     const car = booking.car;
     const villa = car?.villa;
 

@@ -88,6 +88,20 @@ export async function notifyPaymentOverdue({
   });
 }
 
+export async function notifyClientOnboarding({
+  ownerPhone,
+  ownerName,
+  onboardingUrl,
+}: {
+  ownerPhone: string;
+  ownerName: string;
+  onboardingUrl: string;
+}) {
+  return sendMessage(ownerPhone, {
+    text: `Hi ${ownerName}! 👋\n\nYour car cleaning service has been set up. Please take 2 minutes to add your car details and preferred cleaning days:\n\n${onboardingUrl}\n\n⏰ This link expires in 24 hours. After that, your cleaner will add the details for you.`,
+  });
+}
+
 export async function notifyPaymentReceived({
   ownerPhone,
   ownerName,
