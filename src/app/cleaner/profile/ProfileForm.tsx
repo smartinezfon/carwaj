@@ -5,14 +5,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Employee } from "@/lib/types";
 import { useT } from "@/lib/LanguageContext";
-import { LANG_NAMES, type Lang } from "@/lib/i18n";
-
-const LANGS = Object.entries(LANG_NAMES) as [Lang, string][];
 
 export default function ProfileForm({ employee }: { employee: Employee }) {
   const router = useRouter();
   const supabase = createClient();
-  const { t, lang, setLang } = useT();
+  const { t } = useT();
   const [name, setName] = useState(employee.name);
   const [whatsappNumber, setWhatsappNumber] = useState(employee.whatsapp_number ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -85,31 +82,6 @@ export default function ProfileForm({ employee }: { employee: Employee }) {
           {t("profile_logout")}
         </button>
       </form>
-
-      {/* Language selector */}
-      <div className="rounded-card bg-white border border-line p-4">
-        <h2 className="text-sm font-semibold mb-3">{t("profile_language")}</h2>
-        <div className="space-y-2">
-          {LANGS.map(([code, label]) => (
-            <button
-              key={code}
-              onClick={() => setLang(code)}
-              className={`w-full flex items-center justify-between rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
-                lang === code
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-line bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <span>{label}</span>
-              {lang === code && (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12l5 5L20 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

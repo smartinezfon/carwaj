@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getEmployee } from "@/lib/getEmployee";
 import ProfileForm from "./ProfileForm";
 import ProfileSummary from "./ProfileSummary";
+import LanguageSelector from "./LanguageSelector";
 
 export default async function ProfilePage() {
   const supabase = createClient();
@@ -59,8 +60,9 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-4">
-      <ProfileForm employee={employee} />
       <ProfileSummary communities={communitySummary} />
+      <LanguageSelector />
+      <ProfileForm employee={employee} />
     </div>
   );
 }
