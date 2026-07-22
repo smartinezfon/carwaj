@@ -1,4 +1,4 @@
-export type Lang = "en" | "hi" | "bn" | "ur" | "pa";
+export type Lang = "en" | "hi" | "bn" | "ur" | "pa" | "te";
 
 export const LANG_NAMES: Record<Lang, string> = {
   en: "English",
@@ -6,6 +6,7 @@ export const LANG_NAMES: Record<Lang, string> = {
   bn: "বাংলা",
   ur: "اردو",
   pa: "پنجابی",
+  te: "తెలుగు",
 };
 
 export const LANG_REGIONS: Record<Lang, string> = {
@@ -14,6 +15,7 @@ export const LANG_REGIONS: Record<Lang, string> = {
   bn: "India · বাংলা",
   ur: "Pakistan · اردو",
   pa: "Pakistan · پنجابی",
+  te: "India · తెలుగు",
 };
 
 export const RTL_LANGS = new Set<Lang>(["ur", "pa"]);
@@ -24,6 +26,7 @@ export const MONTHS: Record<Lang, string[]> = {
   bn: ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"],
   ur: ["جنوری","فروری","مارچ","اپریل","مئی","جون","جولائی","اگست","ستمبر","اکتوبر","نومبر","دسمبر"],
   pa: ["جنوری","فروری","مارچ","اپریل","مئی","جون","جولائی","اگست","ستمبر","اکتوبر","نومبر","دسمبر"],
+  te: ["జనవరి","ఫిబ్రవరి","మార్చి","ఏప్రిల్","మే","జూన్","జూలై","ఆగస్టు","సెప్టెంబర్","అక్టోబర్","నవంబర్","డిసెంబర్"],
 };
 
 export const WEEKDAYS_SHORT: Record<Lang, string[]> = {
@@ -32,6 +35,7 @@ export const WEEKDAYS_SHORT: Record<Lang, string[]> = {
   bn: ["রবি","সোম","মঙ্গল","বুধ","বৃহ","শুক্র","শনি"],
   ur: ["اتو","پیر","منگ","بدھ","جمع","جمع","ہف"],
   pa: ["اتو","پیر","منگ","بدھ","جمع","جمع","ہف"],
+  te: ["ఆది","సోమ","మంగళ","బుధ","గురు","శుక్ర","శని"],
 };
 
 const en = {
@@ -847,7 +851,168 @@ const pa: typeof en = {
   install_dismiss: "بند کرو",
 };
 
-export const translations: Record<Lang, typeof en> = { en, hi, bn, ur, pa };
+const te: typeof en = {
+  nav_today: "నేడు",
+  nav_calendar: "క్యాలెండర్",
+  nav_clients: "క్లయింట్లు",
+  nav_payments: "చెల్లింపులు",
+
+  profile_title: "ప్రొఫైల్",
+  profile_name: "పేరు",
+  profile_phone: "ఫోన్ నంబర్",
+  profile_save: "సేవ్ చేయండి",
+  profile_saving: "సేవ్ అవుతోంది...",
+  profile_saved: "సేవ్ అయింది.",
+  profile_logout: "లాగ్ అవుట్",
+  profile_language: "భాష",
+  profile_customers_title: "సముదాయం వారీగా నా క్లయింట్లు",
+  profile_no_community: "మీరు ఇంకా ఏ సముదాయానికీ కేటాయించబడలేదు.",
+  guide_show_again: "యాప్ గైడ్ చూపించు",
+
+  status_active: "యాక్టివ్",
+  status_paused: "పాజ్ చేయబడింది",
+  status_former: "మాజీ",
+
+  word_client: "క్లయింట్",
+  word_clients: "క్లయింట్లు",
+  word_villa: "విల్లా",
+  word_villas: "విల్లాలు",
+  word_car: "కారు",
+  word_cars: "కార్లు",
+  word_community: "సముదాయం",
+  word_communities: "సముదాయాలు",
+  word_payment: "చెల్లింపు",
+  word_payments: "చెల్లింపులు",
+  word_day: "రోజు",
+  word_days: "రోజులు",
+  word_early: "ముందుగా",
+  word_late: "ఆలస్యంగా",
+  word_overdue: "వాయిదా మీరిన",
+  word_due: "బాకీ",
+  word_was_due: "బాకీ ఉంది",
+  word_pending: "పెండింగ్",
+  word_paid: "చెల్లించిన",
+
+  client_no_cars: "ఇంకా కార్లు లేవు",
+  client_paid_up: "చెల్లింపు పూర్తయింది",
+  client_edit: "సవరించు",
+  client_close: "మూసివేయి",
+  client_payment_section: "చెల్లింపు",
+  client_history: "చరిత్ర",
+  client_add_car: "+ కారు జోడించండి",
+  client_add_car_save: "కారును సేవ్ చేయండి",
+  client_cancel: "రద్దు చేయండి",
+  client_color_placeholder: "రంగు",
+  client_plate_placeholder: "ప్లేట్ నంబర్",
+  client_model_placeholder: "మోడల్ పేరు",
+
+  schedule_add_btn: "+ షెడ్యూల్ జోడించండి",
+  schedule_pick_day_error: "కనీసం ఒక రోజు ఎంచుకోండి",
+  schedule_start_time: "ప్రారంభ సమయం",
+  schedule_end_time: "ముగింపు సమయం",
+  schedule_first_payment: "మొదటి చెల్లింపు తేదీ",
+  schedule_save: "షెడ్యూల్ సేవ్ చేయండి",
+  schedule_cancel: "రద్దు చేయండి",
+
+  edit_villa_number: "విల్లా నంబర్",
+  edit_owner_name: "యజమాని పేరు",
+  edit_owner_whatsapp: "యజమాని WhatsApp",
+  edit_notes: "గమనికలు",
+  edit_amount: "నెలవారీ మొత్తం (AED)",
+  edit_save: "సేవ్ చేయండి",
+  edit_cancel: "రద్దు చేయండి",
+  edit_status: "స్థితి",
+
+  clients_title: "నా క్లయింట్లు",
+  clients_new_btn: "+ కొత్త క్లయింట్",
+  clients_empty: "ఇంకా క్లయింట్లు లేరు. మీ మొదటి విల్లాను జోడించండి.",
+
+  new_client_community: "సముదాయం",
+  new_client_villa_number: "విల్లా నంబర్",
+  new_client_owner_name: "యజమాని పేరు",
+  new_client_owner_whatsapp: "యజమాని WhatsApp",
+  new_client_notes: "గమనికలు",
+  new_client_amount: "నెలవారీ మొత్తం",
+  new_client_submit: "క్లయింట్‌ను జోడించండి",
+  new_client_whatsapp_hint: "క్లయింట్ తమ ప్రొఫైల్‌ను పూర్తి చేయడానికి WhatsApp లింక్ పంపబడుతుంది.",
+  new_client_no_community: "మీరు ఇంకా ఏ సముదాయానికీ కేటాయించబడలేదు. మీ అడ్మిన్‌ను అడగండి.",
+  new_client_title: "కొత్త క్లయింట్",
+
+  onboarding_awaiting: "క్లయింట్ కోసం వేచి ఉంది",
+  onboarding_received: "వివరాలు అందాయి",
+  onboarding_add_details: "వివరాలు జోడించండి",
+  onboarding_expired_msg: "క్లయింట్ స్పందించలేదు. మీరు దిగువన వివరాలను మాన్యువల్‌గా జోడించవచ్చు.",
+
+  payments_title: "చెల్లింపులు",
+  payments_pending_tab: "పెండింగ్",
+  payments_paid_tab: "చెల్లించినవి",
+  payments_overdue: "వాయిదా మీరినవి",
+  payments_this_week: "ఈ వారం",
+  payments_next_week: "వచ్చే వారం",
+  payments_later: "తర్వాత",
+  payments_mark_paid: "చెల్లించినట్లు గుర్తించండి",
+  payments_did_receive: "విల్లా {villa} నుండి AED {amount} అందిందా?",
+  payments_yes_received: "అవును, అందింది",
+  payments_cancel: "రద్దు చేయండి",
+  payments_how_paid: "ఎలా చెల్లించారు?",
+  payments_cash: "నగదు",
+  payments_transfer: "బదిలీ",
+  payments_all_caught_up: "అంతా సర్దుకుంది! పెండింగ్ చెల్లింపులు లేవు. 🎉",
+  payments_none_recorded: "ఇంకా చెల్లింపులు నమోదు కాలేదు.",
+  payments_on_time: "సమయానికి",
+
+  today_no_jobs: "నేటికి ఏ పనులు షెడ్యూల్ చేయలేదు.",
+  today_no_jobs_badge: "పనులు లేవు",
+  today_todo: "చేయవలసినవి",
+  today_completed: "పూర్తయింది",
+
+  booking_back: "← వెనుకకు",
+  booking_plate: "ప్లేట్",
+  booking_owner: "యజమాని",
+  booking_start_cleaning: "శుభ్రపరచడం ప్రారంభించండి",
+  booking_mark_completed: "పూర్తయినట్లు గుర్తించండి",
+  booking_after_photo: "తర్వాత ఫోటో",
+  booking_no_photo: "ఇంకా ఫోటో లేదు",
+  booking_take_photo: "తర్వాత ఫోటో తీయండి",
+  booking_retake_photo: "మళ్లీ ఫోటో తీయండి",
+  booking_job_completed: "✅ పని పూర్తయింది మరియు క్లయింట్‌కు తెలియజేయబడింది",
+  booking_reschedule: "ఈ పనిని రీషెడ్యూల్ చేయండి",
+  booking_reschedule_title: "రీషెడ్యూల్",
+  booking_save: "సేవ్ చేయండి",
+  booking_cancel: "రద్దు చేయండి",
+  booking_time_placeholder: "ఉదా. 09:00 - 10:00",
+  booking_compressing: "కుదించుతోంది…",
+  booking_uploading: "అప్‌లోడ్ అవుతోంది…",
+  booking_retry: "మళ్లీ ప్రయత్నించండి",
+  booking_loading: "లోడ్ అవుతోంది...",
+  booking_not_found: "పని కనుగొనబడలేదు.",
+
+  guide_step1_title: "నా క్లయింట్లు",
+  guide_step1_body: "ఇక్కడ నుండి ప్రారంభించండి — '+ కొత్త క్లయింట్' నొక్కి మీ మొదటి క్లయింట్‌ను జోడించండి. వారి విల్లా, కార్లు మరియు క్లీనింగ్ షెడ్యూల్‌ను సెటప్ చేయండి.",
+  guide_step2_title: "నేటి పనులు",
+  guide_step2_body: "నేడు ఏమి శుభ్రం చేయాలో చూడండి. పనిని ప్రారంభించడానికి కార్డును నొక్కండి, మీ తర్వాత ఫోటోను అప్‌లోడ్ చేయండి మరియు పూర్తయినట్లు గుర్తించండి.",
+  guide_step3_title: "క్యాలెండర్",
+  guide_step3_body: "మీ నెలవారీ షెడ్యూల్. ఆ రోజు ఏమి బుక్ అయిందో చూడటానికి ఏదైనా తేదీని నొక్కండి.",
+  guide_step4_title: "చెల్లింపులు",
+  guide_step4_body: "ఏమి బాకీ ఉందో మరియు ఏమి వసూలైందో ట్రాక్ చేయండి. అందిన చెల్లింపును గుర్తించడానికి నొక్కండి.",
+  guide_step5_title: "ప్రొఫైల్ & సెట్టింగ్‌లు",
+  guide_step5_body: "మీ భాషను మార్చండి, మీ పేరును అప్‌డేట్ చేయండి లేదా లాగ్ అవుట్ చేయండి. ఎప్పుడైనా పై మూలలో మీ అక్షరాలను నొక్కండి.",
+  guide_next: "తదుపరి",
+  guide_done: "పూర్తయింది",
+  guide_skip: "దాటవేయి",
+
+  install_title: "Carwaj ఇన్‌స్టాల్ చేయండి",
+  install_subtitle: "త్వరిత యాక్సెస్ కోసం మీ హోమ్ స్క్రీన్‌కు జోడించండి",
+  install_btn: "ఇన్‌స్టాల్ చేయండి",
+  install_how: "ఎలా?",
+  install_ios_title: "Carwajను మీ హోమ్ స్క్రీన్‌కు జోడించండి:",
+  install_ios_step1: "Safari దిగువన ఉన్న షేర్ బటన్ ⎙ నొక్కండి",
+  install_ios_step2: "క్రిందికి స్క్రోల్ చేసి \"Add to Home Screen\" నొక్కండి",
+  install_ios_step3: "పై కుడి వైపున Add నొక్కండి",
+  install_dismiss: "విస్మరించు",
+};
+
+export const translations: Record<Lang, typeof en> = { en, hi, bn, ur, pa, te };
 export type TKey = keyof typeof en;
 
 export function translate(lang: Lang, key: TKey, vars?: Record<string, string | number>): string {
