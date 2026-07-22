@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 function CarLogo({ size }: { size: number }) {
@@ -21,7 +20,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const supabase = createClient();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -43,12 +41,16 @@ export default function LoginPage() {
       .eq("auth_user_id", data.session.user.id)
       .single();
 
-    if (employee?.must_change_password) {
-      router.push("/set-password");
-    } else {
-      router.push(employee?.role === "admin" ? "/admin" : "/cleaner");
-    }
-    router.refresh();
+    const destination = employee?.must_change_password
+      ? "/set-password"
+      : employee?.role === "admin"
+        ? "/admin"
+        : "/cleaner";
+
+    // Full navigation instead of router.push: guarantees the request carries
+    // the freshly-set auth cookie and can't be served by a stale SW cache
+    // entry, which is what caused the post-login redirect loop.
+    window.location.href = destination;
   }
 
   return (
