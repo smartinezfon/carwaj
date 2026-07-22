@@ -1,20 +1,24 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useT } from "@/lib/LanguageContext";
 
 const STORAGE_KEY = "carwaj_guide_done";
 
 const STEP_KEYS = [
-  { target: "clients",  titleKey: "guide_step1_title", bodyKey: "guide_step1_body", arrow: "down" },
-  { target: "today",    titleKey: "guide_step2_title", bodyKey: "guide_step2_body", arrow: "down" },
-  { target: "calendar", titleKey: "guide_step3_title", bodyKey: "guide_step3_body", arrow: "down" },
-  { target: "payments", titleKey: "guide_step4_title", bodyKey: "guide_step4_body", arrow: "down" },
-  { target: "profile",  titleKey: "guide_step5_title", bodyKey: "guide_step5_body", arrow: "up"   },
+  { target: "clients",         titleKey: "guide_step1_title",     bodyKey: "guide_step1_body",     arrow: "down" },
+  { target: "new_client_btn",  titleKey: "guide_step1b_title",    bodyKey: "guide_step1b_body",    arrow: "up",   route: "/cleaner/clients" },
+  { target: "today",           titleKey: "guide_step2_title",     bodyKey: "guide_step2_body",     arrow: "down" },
+  { target: "calendar",        titleKey: "guide_step3_title",     bodyKey: "guide_step3_body",     arrow: "down" },
+  { target: "payments",        titleKey: "guide_step4_title",     bodyKey: "guide_step4_body",     arrow: "down" },
+  { target: "profile",         titleKey: "guide_step5_title",     bodyKey: "guide_step5_body",     arrow: "up"   },
 ] as const;
 
 export default function WalkthroughOverlay() {
   const { t } = useT();
+  const router = useRouter();
+  const pathname = usePathname();
   const [step, setStep] = useState(-1);
   const [rect, setRect] = useState<DOMRect | null>(null);
 
@@ -48,12 +52,38 @@ export default function WalkthroughOverlay() {
     return () => window.removeEventListener("carwaj:startGuide", handler);
   }, [start]);
 
-  // Measure target element position
+  // Measure target element position (navigating first if this step needs a different page)
   useEffect(() => {
     if (step < 0) { setRect(null); return; }
-    const el = document.querySelector(`[data-guide="${STEP_KEYS[step].target}"]`);
-    if (el) setRect(el.getBoundingClientRect());
-  }, [step]);
+    const current = STEP_KEYS[step];
+    const route = "route" in current ? current.route : undefined;
+    if (route && pathname !== route) {
+      setRect(null);
+      router.push(route);
+      return;
+    }
+
+    const el = document.querySelector(`[data-guide="${current.target}"]`);
+    if (el) {
+      setRect(el.getBoundingClientRect());
+      return;
+    }
+
+    // Element not mounted yet (e.g. server component still loading after navigation) — poll briefly
+    setRect(null);
+    let attempts = 0;
+    const id = setInterval(() => {
+      attempts += 1;
+      const found = document.querySelector(`[data-guide="${current.target}"]`);
+      if (found) {
+        setRect(found.getBoundingClientRect());
+        clearInterval(id);
+      } else if (attempts > 40) {
+        clearInterval(id);
+      }
+    }, 100);
+    return () => clearInterval(id);
+  }, [step, pathname, router]);
 
   if (step < 0 || !rect) return null;
 

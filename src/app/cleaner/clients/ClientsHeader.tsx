@@ -11,6 +11,7 @@ export default function ClientsHeader({ isEmpty }: { isEmpty: boolean }) {
         <h1 className="text-xl font-bold">{t("clients_title")}</h1>
         <Link
           href="/cleaner/clients/new"
+          data-guide="new_client_btn"
           className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
         >
           {t("clients_new_btn")}
