@@ -17,7 +17,8 @@ export async function sendWhatsAppMessage({ to, message, mediaUrl }: SendWhatsAp
 
   const client = twilio(accountSid, authToken);
 
-  const formattedTo = to.startsWith("whatsapp:") ? to : `whatsapp:${to}`;
+  const normalized = to.replace(/\s+/g, "");
+  const formattedTo = normalized.startsWith("whatsapp:") ? normalized : `whatsapp:${normalized}`;
 
   return client.messages.create({
     from,
