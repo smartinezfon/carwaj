@@ -6,9 +6,9 @@ import { useT } from "@/lib/LanguageContext";
 const STORAGE_KEY = "carwaj_guide_done";
 
 const STEP_KEYS = [
-  { target: "today",    titleKey: "guide_step1_title", bodyKey: "guide_step1_body", arrow: "down" },
-  { target: "calendar", titleKey: "guide_step2_title", bodyKey: "guide_step2_body", arrow: "down" },
-  { target: "clients",  titleKey: "guide_step3_title", bodyKey: "guide_step3_body", arrow: "down" },
+  { target: "clients",  titleKey: "guide_step1_title", bodyKey: "guide_step1_body", arrow: "down" },
+  { target: "today",    titleKey: "guide_step2_title", bodyKey: "guide_step2_body", arrow: "down" },
+  { target: "calendar", titleKey: "guide_step3_title", bodyKey: "guide_step3_body", arrow: "down" },
   { target: "payments", titleKey: "guide_step4_title", bodyKey: "guide_step4_body", arrow: "down" },
   { target: "profile",  titleKey: "guide_step5_title", bodyKey: "guide_step5_body", arrow: "up"   },
 ] as const;
