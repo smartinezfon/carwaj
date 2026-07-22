@@ -10,6 +10,7 @@ const LANG_OPTIONS: { code: Lang; label: string; native: string }[] = [
   { code: "bn", label: "Bengali",  native: "বাংলা" },
   { code: "ur", label: "Urdu",     native: "اردو" },
   { code: "pa", label: "Punjabi",  native: "پنجابی" },
+  { code: "te", label: "Telugu",   native: "తెలుగు" },
 ];
 
 type Phase = "lang" | "install" | null;
