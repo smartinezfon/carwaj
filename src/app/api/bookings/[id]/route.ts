@@ -95,7 +95,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
           ownerPhone: villa.owner_whatsapp,
           ownerName: villa.owner_name,
           carLabel,
-          afterPhotoUrl: booking.after_photo_url,
         });
         console.log("[WhatsApp] Notification sent successfully");
       } catch (err) {
