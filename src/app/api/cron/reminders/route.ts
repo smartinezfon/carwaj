@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyPaymentDue, notifyPaymentOverdue } from "@/lib/whatsapp";
-import { localDateStr, startOfBusinessDay } from "@/lib/date";
+import { localDateStr, startOfBusinessDate, startOfBusinessDay } from "@/lib/date";
 
 // Run daily. Handles:
 // 1. Payment due reminders: 3 days, 2 days, 1 day before due date
-// 2. Overdue payment reminders: every day after due date until paid
+// 2. Overdue payment reminders: weekly after the due date until paid
+const OVERDUE_REMINDER_INTERVAL_DAYS = 7;
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -65,12 +66,23 @@ export async function GET(request: NextRequest) {
     .lt("due_date", todayStr);
 
   let overdueReminders = 0;
+  let overdueSkipped = 0;
   for (const payment of overduePayments ?? []) {
     const villa = (payment as any).villa;
     if (!villa?.owner_whatsapp) continue;
 
-    const dueMs = new Date(payment.due_date).getTime();
-    const overdueDays = Math.floor((today.getTime() - dueMs) / (1000 * 60 * 60 * 24));
+    // Both sides are business-timezone midnights, so the gap is a whole
+    // number of days and round() is exact.
+    const dueStart = startOfBusinessDate(payment.due_date);
+    const overdueDays = Math.round((today.getTime() - dueStart.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Once a week, not once a day: the day after the due date, then day 8,
+    // 15, 22 and so on. A daily chase is harassment, and it just teaches the
+    // client to mute the number — after which no reminder works at all.
+    if (overdueDays < 1 || overdueDays % OVERDUE_REMINDER_INTERVAL_DAYS !== 1) {
+      overdueSkipped++;
+      continue;
+    }
 
     try {
       await notifyPaymentOverdue({
@@ -86,5 +98,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ dueReminders, overdueReminders });
+  return NextResponse.json({ dueReminders, overdueReminders, overdueSkipped });
 }
