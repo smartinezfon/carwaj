@@ -39,7 +39,7 @@ module.exports = withPWA({
         // sw.js, where outer-scope identifiers wouldn't exist.
         urlPattern: ({ url, sameOrigin }) =>
           sameOrigin &&
-          ["/login", "/admin", "/cleaner", "/set-password"].some((prefix) =>
+          ["/login", "/app", "/admin", "/cleaner", "/set-password"].some((prefix) =>
             url.pathname.startsWith(prefix)
           ),
         handler: "NetworkOnly",

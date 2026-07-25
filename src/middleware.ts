@@ -28,6 +28,16 @@ export async function middleware(request: NextRequest) {
     path.startsWith("/admin") ||
     path.startsWith("/superadmin");
 
+  // "/" is the public landing page, but it was the app entry point before, and
+  // every PWA installed until now has start_url "/". Without this, a cleaner
+  // opening their installed app would land on marketing instead of their round.
+  // Signed-out visitors fall through and get the static landing page.
+  if (path === "/" && session) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/app";
+    return NextResponse.redirect(url);
+  }
+
   // Handle /set-password separately — not in isProtected but still needs session
   if (path === "/set-password") {
     if (!session) {
@@ -111,5 +121,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/cleaner/:path*", "/admin/:path*", "/superadmin/:path*", "/set-password"],
+  matcher: ["/", "/cleaner/:path*", "/admin/:path*", "/superadmin/:path*", "/set-password"],
 };

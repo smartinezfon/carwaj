@@ -1,20 +1,12 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-export default async function Home() {
-  const supabase = createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+import type { Metadata } from "next";
+import LandingPage from "./LandingPage";
 
-  if (!session) redirect("/login");
+export const metadata: Metadata = {
+  title: "Carwaj — Car wash operations, handled",
+  description:
+    "Schedules, cleaners, clients and payments for car washing companies in the UAE. Clients stay updated on WhatsApp. One app, no spreadsheets.",
+};
 
-  const { data: employee } = await supabase
-    .from("employees")
-    .select("role, must_change_password")
-    .eq("auth_user_id", session.user.id)
-    .single();
-
-  if (employee?.must_change_password) redirect("/set-password");
-
-  if (employee?.role === "super_admin") redirect("/superadmin");
-  if (employee?.role === "admin") redirect("/admin");
-  redirect("/cleaner");
+export default function Home() {
+  return <LandingPage />;
 }

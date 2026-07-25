@@ -2,7 +2,7 @@
   "name": "Carwaj",
   "short_name": "Carwaj",
   "description": "Car cleaning schedule and operations",
-  "start_url": "/",
+  "start_url": "/app",
   "display": "standalone",
   "background_color": "#f4f6f9",
   "theme_color": "#2563eb",
