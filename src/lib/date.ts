@@ -35,6 +35,14 @@ export function startOfBusinessDay(date: Date = new Date()): Date {
   return new Date(`${localDateStr(date)}T00:00:00+04:00`);
 }
 
+// Midnight at the start of a stored YYYY-MM-DD date, in the business timezone.
+// Use this rather than `new Date(dateStr)`, which parses bare dates as UTC
+// midnight — four hours adrift of the business day, enough to lose a whole day
+// when the difference between two dates is floored.
+export function startOfBusinessDate(dateStr: string): Date {
+  return new Date(`${dateStr}T00:00:00+04:00`);
+}
+
 // Midnight at the start of the current business-timezone week (Monday-first).
 export function startOfBusinessWeek(date: Date = new Date()): Date {
   const dayStart = startOfBusinessDay(date);
