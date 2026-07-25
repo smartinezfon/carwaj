@@ -39,7 +39,6 @@ export async function GET(request: NextRequest) {
       ownerPhone: villa.owner_whatsapp,
       ownerName: villa.owner_name,
       carLabel,
-      afterPhotoUrl: booking.after_photo_url,
     });
     return NextResponse.json({ status: "sent", result, ownerPhone: villa.owner_whatsapp });
   } catch (err) {
@@ -48,7 +47,6 @@ export async function GET(request: NextRequest) {
       error: err instanceof Error ? err.message : String(err),
       ownerPhone: villa.owner_whatsapp,
       carLabel,
-      afterPhotoUrl: booking.after_photo_url,
     }, { status: 500 });
   }
 }

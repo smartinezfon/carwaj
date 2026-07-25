@@ -4,17 +4,15 @@ export async function notifyCarCleaned({
   ownerPhone,
   ownerName,
   carLabel,
-  afterPhotoUrl,
 }: {
   ownerPhone: string;
   ownerName: string;
   carLabel: string;
-  afterPhotoUrl?: string | null;
 }) {
   return sendWhatsAppMessage({
     to: ownerPhone,
-    message: `Hi ${ownerName} 👋 Your ${carLabel} has just been cleaned! ✅ Have a great day.`,
-    mediaUrl: afterPhotoUrl ?? undefined,
+    contentSid: process.env.TWILIO_TEMPLATE_CAR_CLEANED_SID!,
+    contentVariables: { "1": ownerName, "2": carLabel },
   });
 }
 
@@ -34,7 +32,13 @@ export async function notifyPaymentDue({
   const dayWord = daysUntilDue === 1 ? "tomorrow" : `in ${daysUntilDue} days`;
   return sendWhatsAppMessage({
     to: ownerPhone,
-    message: `Hi ${ownerName} 👋 A friendly reminder that your car cleaning payment of *AED ${amount}* is due ${dayWord} (${dueDate}). Please arrange payment at your earliest convenience. Thank you!`,
+    contentSid: process.env.TWILIO_TEMPLATE_PAYMENT_DUE_SID!,
+    contentVariables: {
+      "1": ownerName,
+      "2": String(amount),
+      "3": dayWord,
+      "4": dueDate,
+    },
   });
 }
 
@@ -68,7 +72,8 @@ export async function notifyClientOnboarding({
 }) {
   return sendWhatsAppMessage({
     to: ownerPhone,
-    message: `Hi ${ownerName}! 👋\n\nYour car cleaning service has been set up. Please take 2 minutes to add your car details and preferred cleaning days:\n\n${onboardingUrl}\n\n⏰ This link expires in 24 hours. After that, your cleaner will add the details for you.`,
+    contentSid: process.env.TWILIO_TEMPLATE_CLIENT_ONBOARDING_SID!,
+    contentVariables: { "1": ownerName, "2": onboardingUrl },
   });
 }
 
@@ -85,6 +90,7 @@ export async function notifyPaymentReceived({
 }) {
   return sendWhatsAppMessage({
     to: ownerPhone,
-    message: `Hi ${ownerName} 🙏 We have received your payment of *AED ${amount}* via ${method}. Thank you for your business — we look forward to keeping your car spotless!`,
+    contentSid: process.env.TWILIO_TEMPLATE_PAYMENT_RECEIVED_SID!,
+    contentVariables: { "1": ownerName, "2": String(amount), "3": method },
   });
 }
