@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import StatusBadge from "@/components/StatusBadge";
 import type { BookingWithDetails } from "@/lib/types";
-import imageCompression from "browser-image-compression";
 import { useT } from "@/lib/LanguageContext";
 
 type UploadState =
@@ -50,6 +49,11 @@ export default function BookingDetailPage() {
 
     let compressed: File;
     try {
+      // Loaded on demand: the compression library is only needed once a
+      // cleaner actually picks a photo, so it stays out of the initial
+      // bundle for this page. A failed import falls through to the
+      // uncompressed original, same as a failed compression.
+      const { default: imageCompression } = await import("browser-image-compression");
       compressed = await imageCompression(file, {
         maxSizeMB: 1.5,
         maxWidthOrHeight: 1920,

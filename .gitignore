@@ -8,6 +8,14 @@ node_modules
 .DS_Store
 .claude/
 
+# Local design scratch — kept on disk, not in the repo.
+# The canonical mockup is "Mockups V1/carwaj_mockups.html" (the root copy is
+# byte-identical); Carwaj.zip is the superseded July 2026 design handoff, now
+# replaced by the Figma file. Safe to delete any of these locally.
+/Carwaj.zip
+/Carwaj-logo.jpg
+/carwaj_mockups.html
+
 # PWA generated files
 public/sw.js
 public/workbox-*.js

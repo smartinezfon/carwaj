@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AddCarForm from "./AddCarForm";
@@ -216,9 +217,12 @@ export default function ClientCard({
                     className="flex-shrink-0 w-24 rounded-lg overflow-hidden border border-line"
                   >
                     {b.after_photo_url ? (
-                      <img
+                      <Image
                         src={b.after_photo_url}
                         alt="After"
+                        width={96}
+                        height={80}
+                        sizes="96px"
                         className="w-24 h-20 object-cover"
                       />
                     ) : (

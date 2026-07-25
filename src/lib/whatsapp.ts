@@ -55,9 +55,18 @@ export async function notifyPaymentOverdue({
   dueDate: string;
   overdueDays: number;
 }) {
+  // Carries its own "day"/"days" like notifyPaymentDue's dayWord does: a
+  // Content template can't pluralise, so the wording has to arrive formed.
+  const dayWord = overdueDays === 1 ? "1 day" : `${overdueDays} days`;
   return sendWhatsAppMessage({
     to: ownerPhone,
-    message: `Hi ${ownerName}, your car cleaning payment of *AED ${amount}* was due on ${dueDate} and is now *${overdueDays} day${overdueDays === 1 ? "" : "s"} overdue*. Please arrange payment as soon as possible. Thank you!`,
+    contentSid: process.env.TWILIO_TEMPLATE_PAYMENT_OVERDUE_SID!,
+    contentVariables: {
+      "1": ownerName,
+      "2": String(amount),
+      "3": dueDate,
+      "4": dayWord,
+    },
   });
 }
 
