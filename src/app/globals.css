@@ -2,6 +2,180 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Carwaj design tokens
+   --------------------------------------------------------------------------
+   Mirrors the Figma file "Carwaj Design System" (is1LWl6bXZHdoWo4adp3C8).
+   Every Figma variable carries a `var(--carwaj-*)` code syntax that matches a
+   name below, so Dev Mode output drops straight into this codebase.
+
+   Figma is the master for these values. To change a colour, change it in the
+   Figma variable first, then mirror it here — not the other way round.
+
+   Two forms exist for tokens Tailwind consumes:
+     --carwaj-x       full colour, for use in plain CSS
+     --carwaj-x-rgb   space-separated channels, so Tailwind's /opacity
+                      modifiers (bg-canvas/50) keep working
+   ========================================================================== */
+
+:root {
+  /* ---- Primitives: blue ---- */
+  --carwaj-blue-50: #eff6ff;
+  --carwaj-blue-100: #e6efff;
+  --carwaj-blue-150: #e8f0fe;
+  --carwaj-blue-200: #dfe7f5;
+  --carwaj-blue-600: #2563eb;
+  --carwaj-blue-700: #1d4ed8;
+  --carwaj-blue-900: #1e40af;
+
+  /* ---- Primitives: slate / gray ---- */
+  --carwaj-slate-900: #0f172a;
+  --carwaj-slate-800: #1e293b;
+  --carwaj-slate-700: #334155;
+  --carwaj-slate-600: #475569;
+  --carwaj-slate-500: #64748b;
+  --carwaj-slate-400: #94a3b8;
+  --carwaj-gray-500: #6b7280;
+  --carwaj-gray-400: #9aa3af;
+  --carwaj-gray-muted: #7b8696;
+
+  /* ---- Primitives: surfaces ---- */
+  --carwaj-base-white: #ffffff;
+  --carwaj-surface-50: #fafbfc;
+  --carwaj-surface-100: #f8fafc;
+  --carwaj-surface-200: #f1f3f6;
+  --carwaj-surface-canvas: #eceff3;
+  --carwaj-surface-field: #fbfcfd;
+
+  /* ---- Primitives: lines ---- */
+  --carwaj-line-100: #f1f5f9;
+  --carwaj-line-200: #eef1f5;
+  --carwaj-line-300: #e8edf2;
+  --carwaj-line-400: #e6eaef;
+  --carwaj-line-500: #e2e8f0;
+  --carwaj-line-600: #dde3ea;
+
+  /* ---- Primitives: amber ---- */
+  --carwaj-amber-700: #b45309;
+  --carwaj-amber-600: #d97706;
+  --carwaj-amber-500: #f59e0b;
+  --carwaj-amber-100: #fdeccf;
+  --carwaj-amber-50: #fff4e5;
+
+  /* ---- Primitives: green / teal ---- */
+  --carwaj-green-700: #15803d;
+  --carwaj-green-600: #16a34a;
+  --carwaj-green-100: #dcfce7;
+  --carwaj-green-50: #e7f7ee;
+  --carwaj-green-25: #f0fdf4;
+  --carwaj-teal-600: #0d9488;
+  --carwaj-teal-100: #dcf5f1;
+  --carwaj-emerald-100: #d1fae5;
+
+  /* ---- Primitives: red ---- */
+  --carwaj-red-700: #b91c1c;
+  --carwaj-red-500: #ef4444;
+  --carwaj-red-50: #fdecec;
+
+  /* ---- Primitives: purple ---- */
+  --carwaj-purple-800: #5b21b6;
+  --carwaj-purple-600: #7c3aed;
+  --carwaj-purple-400: #a78bfa;
+  --carwaj-purple-100: #ede9fe;
+  --carwaj-purple-50: #faf5ff;
+
+  /* ---- Primitives: device chrome (mockups only) ---- */
+  --carwaj-device-body: #1c1c1e;
+  --carwaj-device-notch: #0a0a0a;
+
+  /* ---- Semantic: brand ---- */
+  --carwaj-brand-primary: var(--carwaj-blue-600);
+  --carwaj-brand-primary-hover: var(--carwaj-blue-700);
+  --carwaj-brand-on-primary: var(--carwaj-base-white);
+  --carwaj-brand-tint: var(--carwaj-blue-50);
+
+  /* ---- Semantic: backgrounds ---- */
+  --carwaj-bg-canvas: var(--carwaj-surface-canvas);
+  --carwaj-bg-surface: var(--carwaj-base-white);
+  --carwaj-bg-subtle: var(--carwaj-surface-100);
+  --carwaj-bg-raised: var(--carwaj-surface-50);
+  --carwaj-bg-field: var(--carwaj-surface-field);
+
+  /* ---- Semantic: text ---- */
+  --carwaj-text-primary: var(--carwaj-slate-900);
+  --carwaj-text-secondary: var(--carwaj-slate-400);
+  --carwaj-text-muted: var(--carwaj-gray-muted);
+  --carwaj-text-inverse: var(--carwaj-base-white);
+
+  /* ---- Semantic: borders ---- */
+  --carwaj-border-default: var(--carwaj-line-400);
+  --carwaj-border-subtle: var(--carwaj-line-200);
+  --carwaj-border-card: var(--carwaj-line-300);
+  --carwaj-border-field: var(--carwaj-line-600);
+
+  /* ---- Semantic: booking status ---- */
+  --carwaj-status-scheduled-text: var(--carwaj-amber-700);
+  --carwaj-status-scheduled-bg: var(--carwaj-amber-50);
+  --carwaj-status-scheduled-dot: var(--carwaj-amber-500);
+  --carwaj-status-progress-text: var(--carwaj-blue-700);
+  --carwaj-status-progress-bg: var(--carwaj-blue-150);
+  --carwaj-status-progress-dot: var(--carwaj-blue-600);
+  --carwaj-status-completed-text: var(--carwaj-green-700);
+  --carwaj-status-completed-bg: var(--carwaj-green-50);
+  --carwaj-status-completed-dot: var(--carwaj-green-600);
+  --carwaj-status-cancelled-text: var(--carwaj-red-700);
+  --carwaj-status-cancelled-bg: var(--carwaj-red-50);
+  --carwaj-status-cancelled-dot: var(--carwaj-red-500);
+
+  /* ---- Semantic: accents ---- */
+  --carwaj-accent-schedule-text: var(--carwaj-green-700);
+  --carwaj-accent-schedule-bg: var(--carwaj-green-100);
+  --carwaj-accent-superadmin-text: var(--carwaj-purple-800);
+  --carwaj-accent-superadmin-bg: var(--carwaj-purple-100);
+  --carwaj-accent-superadmin-surface: var(--carwaj-purple-50);
+
+  /* ---- Channel forms ----
+     Only for tokens Tailwind maps in tailwind.config.ts. Keep these in sync
+     with the semantic values above; they exist so /opacity modifiers work. */
+  --carwaj-bg-canvas-rgb: 236 239 243;
+  --carwaj-text-primary-rgb: 15 23 42;
+  --carwaj-text-muted-rgb: 123 134 150;
+  --carwaj-border-default-rgb: 230 234 239;
+
+  --carwaj-status-scheduled-text-rgb: 180 83 9;
+  --carwaj-status-scheduled-bg-rgb: 255 244 229;
+  --carwaj-status-scheduled-dot-rgb: 245 158 11;
+  --carwaj-status-progress-text-rgb: 29 78 216;
+  --carwaj-status-progress-bg-rgb: 232 240 254;
+  --carwaj-status-progress-dot-rgb: 37 99 235;
+  --carwaj-status-completed-text-rgb: 21 128 61;
+  --carwaj-status-completed-bg-rgb: 231 247 238;
+  --carwaj-status-completed-dot-rgb: 22 163 74;
+  --carwaj-status-cancelled-text-rgb: 185 28 28;
+  --carwaj-status-cancelled-bg-rgb: 253 236 236;
+  --carwaj-status-cancelled-dot-rgb: 239 68 68;
+
+  /* ---- Radius ---- */
+  --carwaj-radius-xs: 3px;
+  --carwaj-radius-sm: 7px;
+  --carwaj-radius-md: 9px;
+  --carwaj-radius-control: 13px;
+  --carwaj-radius-card: 20px;
+  --carwaj-radius-phone: 24px;
+  --carwaj-radius-full: 999px;
+
+  /* ---- Spacing ---- */
+  --carwaj-space-2xs: 2px;
+  --carwaj-space-xs: 4px;
+  --carwaj-space-sm: 6px;
+  --carwaj-space-md: 8px;
+  --carwaj-space-lg: 12px;
+  --carwaj-space-xl: 16px;
+  --carwaj-space-2xl: 20px;
+  --carwaj-space-3xl: 24px;
+  --carwaj-space-4xl: 32px;
+}
+
 html, body {
   -webkit-tap-highlight-color: transparent;
 }

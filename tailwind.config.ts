@@ -8,21 +8,40 @@ const config: Config = {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
+      // Values live in src/app/globals.css as --carwaj-* custom properties,
+      // mirroring the Figma variables. The -rgb channel form is used so
+      // opacity modifiers (bg-canvas/50) still work.
       colors: {
-        canvas: "#eceff3",
-        ink: "#0f172a",
-        muted: "#7b8696",
-        line: "#e6eaef",
+        canvas: "rgb(var(--carwaj-bg-canvas-rgb) / <alpha-value>)",
+        ink: "rgb(var(--carwaj-text-primary-rgb) / <alpha-value>)",
+        muted: "rgb(var(--carwaj-text-muted-rgb) / <alpha-value>)",
+        line: "rgb(var(--carwaj-border-default-rgb) / <alpha-value>)",
         // status palette, matches the Carwaj design system
-        scheduled: { text: "#b45309", bg: "#fff4e5", dot: "#f59e0b" },
-        progress: { text: "#1d4ed8", bg: "#e8f0fe", dot: "#2563eb" },
-        completed: { text: "#15803d", bg: "#e7f7ee", dot: "#16a34a" },
-        cancelled: { text: "#b91c1c", bg: "#fdecec", dot: "#ef4444" },
+        scheduled: {
+          text: "rgb(var(--carwaj-status-scheduled-text-rgb) / <alpha-value>)",
+          bg: "rgb(var(--carwaj-status-scheduled-bg-rgb) / <alpha-value>)",
+          dot: "rgb(var(--carwaj-status-scheduled-dot-rgb) / <alpha-value>)",
+        },
+        progress: {
+          text: "rgb(var(--carwaj-status-progress-text-rgb) / <alpha-value>)",
+          bg: "rgb(var(--carwaj-status-progress-bg-rgb) / <alpha-value>)",
+          dot: "rgb(var(--carwaj-status-progress-dot-rgb) / <alpha-value>)",
+        },
+        completed: {
+          text: "rgb(var(--carwaj-status-completed-text-rgb) / <alpha-value>)",
+          bg: "rgb(var(--carwaj-status-completed-bg-rgb) / <alpha-value>)",
+          dot: "rgb(var(--carwaj-status-completed-dot-rgb) / <alpha-value>)",
+        },
+        cancelled: {
+          text: "rgb(var(--carwaj-status-cancelled-text-rgb) / <alpha-value>)",
+          bg: "rgb(var(--carwaj-status-cancelled-bg-rgb) / <alpha-value>)",
+          dot: "rgb(var(--carwaj-status-cancelled-dot-rgb) / <alpha-value>)",
+        },
       },
       borderRadius: {
-        card: "20px",
-        control: "13px",
-        pill: "999px",
+        card: "var(--carwaj-radius-card)",
+        control: "var(--carwaj-radius-control)",
+        pill: "var(--carwaj-radius-full)",
       },
     },
   },
