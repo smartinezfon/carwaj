@@ -82,6 +82,7 @@ export default function BookingDetailPage() {
         const updated = await res.json();
         setBooking(flattenBooking(updated));
         setPreviewUrl(null);
+        router.refresh();
       }
       setUploadState({ status: "idle" });
     } catch (err: any) {
@@ -104,6 +105,10 @@ export default function BookingDetailPage() {
     });
     const updated = await res.json();
     setBooking(flattenBooking(updated));
+    // Today and Calendar are server-rendered and sit in the client router
+    // cache. Without this, marking a wash done and going back shows the old
+    // "2 done" count until something else forces a refetch.
+    router.refresh();
     setBusy(false);
   }
 
@@ -119,6 +124,8 @@ export default function BookingDetailPage() {
     });
     const updated = await res.json();
     setBooking(flattenBooking(updated));
+    // Rescheduling moves the booking off today's list entirely.
+    router.refresh();
     setBusy(false);
   }
 
