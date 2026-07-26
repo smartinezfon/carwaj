@@ -126,19 +126,29 @@ export default function OverviewCards({
   washedToday,
   jobsThisWeek,
   weekByCommunity,
-  revenueThisMonth,
+  revenueDueThisMonth,
+  collectedThisMonth,
+  outstandingThisMonth,
   revenueByCommunity,
+  revenueByVilla,
   revenueByCleaner,
+  unpricedVillas,
 }: {
   jobsToday: number;
   toWashToday: number;
   washedToday: number;
   jobsThisWeek: number;
   weekByCommunity: Record<string, number>;
-  revenueThisMonth: number;
+  revenueDueThisMonth: number;
+  collectedThisMonth: number;
+  outstandingThisMonth: number;
   revenueByCommunity: Record<string, number>;
+  revenueByVilla: Record<string, number>;
   revenueByCleaner: Record<string, number>;
+  unpricedVillas: string[];
 }) {
+  const noRevenueYet = "Nothing due this month.";
+
   return (
     <div className="space-y-3.5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
@@ -161,30 +171,49 @@ export default function OverviewCards({
           iconType="wallet"
           iconBg="#fdeccf"
           iconFg="#d97706"
-          label="Revenue This Month"
-          value={aed(revenueThisMonth)}
+          label="Revenue Due This Month"
+          value={aed(revenueDueThisMonth)}
+          sub={`${aed(collectedThisMonth)} collected · ${aed(outstandingThisMonth)} outstanding`}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 items-start">
+      {unpricedVillas.length > 0 && (
+        <div className="rounded-[20px] border border-[#f59e0b] bg-[#fff4e5] p-[18px]">
+          <p className="text-[13.5px] font-bold text-[#b45309]">
+            {unpricedVillas.length} active {unpricedVillas.length === 1 ? "subscription has" : "subscriptions have"} no price set
+          </p>
+          <p className="text-[12.5px] text-[#b45309] mt-1">
+            Villa {unpricedVillas.join(", ")} — these bill AED 0, so their washes never turn into
+            revenue. Set a monthly amount on the client to fix it.
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 items-start">
+        <BreakdownPanel
+          title="Revenue due by community"
+          rows={revenueByCommunity}
+          format={aed}
+          emptyText={noRevenueYet}
+        />
+        <BreakdownPanel
+          title="Revenue due by villa"
+          rows={revenueByVilla}
+          format={aed}
+          emptyText={noRevenueYet}
+        />
+        <BreakdownPanel
+          title="Revenue due by cleaner"
+          rows={revenueByCleaner}
+          format={aed}
+          emptyText={noRevenueYet}
+          avatars
+        />
         <BreakdownPanel
           title="Jobs this week by community"
           rows={weekByCommunity}
           format={(n) => String(n)}
           emptyText="No jobs this week."
-        />
-        <BreakdownPanel
-          title="Revenue by community"
-          rows={revenueByCommunity}
-          format={aed}
-          emptyText="No active subscriptions."
-        />
-        <BreakdownPanel
-          title="Revenue by cleaner"
-          rows={revenueByCleaner}
-          format={aed}
-          emptyText="No active subscriptions."
-          avatars
         />
       </div>
     </div>
