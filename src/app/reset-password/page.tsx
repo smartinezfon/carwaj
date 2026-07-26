@@ -7,66 +7,59 @@ import AuthCard, { Field, inputClass, submitClass } from "@/components/AuthCard"
 
 type Status = "checking" | "ready" | "invalid";
 
+/**
+ * Recovery tokens are single-use and are spent the moment the link is fetched.
+ * Mail providers run link scanners that fetch every URL in a message to check
+ * for phishing, so a link built on {{ .ConfirmationURL }} — which verifies on
+ * GET — is routinely burnt before the recipient ever clicks it, and they get
+ * "expired" seconds after the email lands.
+ *
+ * So nothing is verified on page load. We carry the token_hash through to the
+ * submit handler and spend it there, alongside the password update: a scanner
+ * can fetch this page all it likes without consuming anything, because only a
+ * real submit does. This also avoids PKCE, whose code_verifier lives in the
+ * browser that requested the reset — frequently not the one the mail app opens
+ * the link in.
+ *
+ * Requires the Supabase "Reset Password" template to link to:
+ *   {{ .SiteURL }}/reset-password?token_hash={{ .TokenHash }}&type=recovery
+ */
 export default function ResetPasswordPage() {
   const supabase = createClient();
   const [status, setStatus] = useState<Status>("checking");
+  const [tokenHash, setTokenHash] = useState<string | null>(null);
+  const [otpType, setOtpType] = useState<string>("recovery");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Establish the recovery session from the emailed link. Supabase may deliver
-  // it two ways depending on the client's flow type: PKCE puts a `code` in the
-  // query string that we exchange ourselves, while the implicit flow puts
-  // tokens in the URL hash which the browser client consumes on its own. Handle
-  // both, because the link is often opened in a mail app's in-app browser
-  // rather than the one that requested it.
   useEffect(() => {
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout>;
+    const query = new URLSearchParams(window.location.search);
+    // Supabase reports failures in the hash on some flows and the query on others.
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session && !cancelled) {
-        clearTimeout(timer);
-        setStatus("ready");
-      }
-    });
-
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (cancelled) return;
-      if (data.session) {
-        setStatus("ready");
-        return;
-      }
-
-      const code = new URLSearchParams(window.location.search).get("code");
-      const hasHashToken = window.location.hash.includes("access_token");
-
-      if (code) {
-        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-        if (cancelled) return;
-        setStatus(exchangeError ? "invalid" : "ready");
-        return;
-      }
-
-      if (hasHashToken) {
-        // detectSessionInUrl handles this asynchronously; onAuthStateChange
-        // above will fire. Give it a moment before calling the link bad.
-        timer = setTimeout(() => {
-          if (!cancelled) setStatus("invalid");
-        }, 4000);
-        return;
-      }
-
+    const errorCode = query.get("error_code") ?? hash.get("error_code");
+    const errorDesc = query.get("error_description") ?? hash.get("error_description");
+    if (errorCode) {
+      setError(errorDesc ? errorDesc.replace(/\+/g, " ") : errorCode);
       setStatus("invalid");
-    })();
+      return;
+    }
 
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-      sub.subscription.unsubscribe();
-    };
+    const hashed = query.get("token_hash");
+    if (hashed) {
+      setTokenHash(hashed);
+      setOtpType(query.get("type") ?? "recovery");
+      setStatus("ready");
+      return;
+    }
+
+    // Older links (and any flow that established a session before landing here)
+    // arrive already authenticated; let those through without a token to spend.
+    supabase.auth.getSession().then(({ data }) => {
+      setStatus(data.session ? "ready" : "invalid");
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -84,6 +77,20 @@ export default function ResetPasswordPage() {
     }
 
     setBusy(true);
+
+    // Spend the token here, not on page load — see the note above.
+    if (tokenHash) {
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        type: otpType as "recovery",
+        token_hash: tokenHash,
+      });
+      if (verifyError) {
+        setError(null);
+        setStatus("invalid");
+        setBusy(false);
+        return;
+      }
+    }
 
     const { error: updateError } = await supabase.auth.updateUser({ password });
     if (updateError) {
@@ -105,13 +112,13 @@ export default function ResetPasswordPage() {
 
     // Full navigation rather than router.push, matching the login page: it
     // guarantees the request carries the fresh auth cookie and cannot be served
-    // from a stale service worker cache entry.
+    // from a stale service worker entry.
     window.location.href = "/app";
   }
 
   if (status === "checking") {
     return (
-      <AuthCard title="Checking your link" subtitle="One moment…">
+      <AuthCard title="Opening your link" subtitle="One moment…">
         <div className="flex justify-center py-2">
           <div className="w-7 h-7 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
         </div>
@@ -133,6 +140,9 @@ export default function ResetPasswordPage() {
           </p>
         }
       >
+        {error && (
+          <p className="rounded-[10px] bg-red-50 px-3 py-2 text-sm text-red-700 mb-5">{error}</p>
+        )}
         <Link href="/forgot-password" className={`${submitClass} flex items-center justify-center`}>
           Request a new link
         </Link>
