@@ -1,0 +1,78 @@
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0; padding: 16px; color: #0f172a; background: #fff;
+  }
+  h1 { font-size: 13px; font-weight: 800; margin: 0 0 2px; letter-spacing: -.2px; }
+  p.sub { font-size: 11px; color: #7b8696; margin: 0 0 14px; line-height: 1.4; }
+  button {
+    display: block; width: 100%; text-align: left;
+    border: 1px solid #e6eaef; background: #fff; color: #0f172a;
+    border-radius: 9px; padding: 9px 11px; margin-bottom: 7px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: inherit;
+  }
+  button:hover:not(:disabled) { background: #f8fafc; border-color: #dde3ea; }
+  button:disabled { opacity: .45; cursor: default; }
+  button .n { color: #94a3b8; font-weight: 700; margin-right: 7px; }
+  button.done { background: #e7f7ee; border-color: #b9e4d0; color: #15803d; }
+  button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+  #log {
+    font-size: 11px; color: #475569; margin-top: 12px; line-height: 1.45;
+    background: #f8fafc; border: 1px solid #eef1f5; border-radius: 8px;
+    padding: 9px 10px; min-height: 34px; white-space: pre-wrap;
+  }
+  #log.err { background: #fdecec; border-color: #f2b2a8; color: #b91c1c; }
+</style>
+
+<h1>Carwaj Design System Builder</h1>
+<p class="sub">Runs locally — no MCP quota. Run steps in order; each one is safe to re-run.</p>
+
+<button id="s1"><span class="n">1</span>Input Field icon slot</button>
+<button id="s2"><span class="n">2</span>Auth screens (3)</button>
+<button id="s3"><span class="n">3</span>Super admin screens (4)</button>
+<button id="s4"><span class="n">4</span>Admin screens (5)</button>
+<button id="s5"><span class="n">5</span>Cleaner screens (5)</button>
+<button id="s6"><span class="n">6</span>Password reset screens (3)</button>
+<button id="all" class="primary">Run everything</button>
+
+<div id="log">Ready.</div>
+
+<script>
+  const log = document.getElementById('log');
+  const steps = ['s1', 's2', 's3', 's4', 's5', 's6'];
+
+  function send(step) {
+    log.className = '';
+    log.textContent = 'Working…';
+    setBusy(true);
+    parent.postMessage({ pluginMessage: { type: 'run', step } }, '*');
+  }
+
+  function setBusy(b) {
+    [...steps, 'all'].forEach(id => { document.getElementById(id).disabled = b; });
+  }
+
+  steps.forEach(id => {
+    document.getElementById(id).onclick = () => send(id);
+  });
+  document.getElementById('all').onclick = () => send('all');
+
+  onmessage = (e) => {
+    const msg = e.data.pluginMessage;
+    if (!msg) return;
+    setBusy(false);
+    if (msg.type === 'done') {
+      log.className = '';
+      log.textContent = msg.text;
+      (msg.completed || []).forEach(id => {
+        const b = document.getElementById(id);
+        if (b) b.classList.add('done');
+      });
+    } else if (msg.type === 'error') {
+      log.className = 'err';
+      log.textContent = msg.text;
+    }
+  };
+</script>
