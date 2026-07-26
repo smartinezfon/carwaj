@@ -20,7 +20,8 @@ export default async function ProfilePage() {
     supabase
       .from("communities")
       .select("id, name")
-      .in("id", employee.community_ids ?? []),
+      .in("id", employee.community_ids ?? [])
+      .order("name"),
     supabase
       .from("villas")
       .select("id, community_id, cars(id)")
