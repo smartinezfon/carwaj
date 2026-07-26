@@ -26,8 +26,9 @@ partial or failed run can just be repeated.
 | 3 | Super admin — Dashboard, Companies, Users, My profile |
 | 4 | Admin — Overview, Employees, Villas, Payments, Communities |
 | 5 | Cleaner — Today, Calendar, Clients, Payments, Profile |
+| 6 | Password reset — Forgot password, Check your email, New password |
 
-"Run everything" does all five in sequence.
+"Run everything" does all six in sequence.
 
 Screens land on the **Screens** page at 375×812, laid out in rows by section.
 

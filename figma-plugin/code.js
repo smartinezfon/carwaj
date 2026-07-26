@@ -417,69 +417,75 @@ async function step1() {
          " variants (" + added + " added). Property: " + prop;
 }
 
+/* --------------------------------------------------- auth screen helpers */
+
+async function authShell(name, route, x, y) {
+  const f = await screen(name, route, x, y || 0);
+  const b = V({ name: "Content", gap: 10, px: 32, align: "CENTER", justify: "CENTER" });
+  f.appendChild(b);
+  b.layoutSizingHorizontal = "FILL";
+  b.layoutSizingVertical = "FILL";
+  return { f, b };
+}
+
+function gap(parent, h) {
+  const s = figma.createFrame();
+  s.resize(1, h); s.fills = [];
+  parent.appendChild(s);
+}
+
+async function field(parent, label, iconName) {
+  const inp = H({ gap: 10, align: "CENTER", px: 14 });
+  inp.primaryAxisSizingMode = "FIXED";
+  inp.counterAxisSizingMode = "FIXED";
+  inp.resize(311, 48);
+  radius(inp, "control");
+  fill(inp, "bg/field");
+  stroke(inp, "border/field", 1.5);
+  parent.appendChild(inp);
+  inp.layoutSizingHorizontal = "FILL";
+  const gi = icon(iconName, 18, "text/secondary");
+  if (gi) inp.appendChild(gi);
+  await T(inp, label, "Body/Medium", "text/secondary");
+}
+
+async function button(parent, label, style) {
+  const btn = H({ align: "CENTER", justify: "CENTER", px: 20 });
+  btn.primaryAxisSizingMode = "FIXED";
+  btn.counterAxisSizingMode = "FIXED";
+  btn.resize(311, 48);
+  radius(btn, "control");
+  if (style === "secondary") {
+    fill(btn, "bg/surface");
+    stroke(btn, "border/field", 1.5);
+  } else {
+    fill(btn, "brand/primary");
+    if (ctx.es["shadow/brand-md"]) await btn.setEffectStyleIdAsync(ctx.es["shadow/brand-md"].id);
+  }
+  parent.appendChild(btn);
+  btn.layoutSizingHorizontal = "FILL";
+  await T(btn, label, "Label/Medium", style === "secondary" ? "text/muted" : "brand/on-primary",
+          { weight: "Semi Bold" });
+}
+
+async function brandMark(parent) {
+  const logo = H({ align: "CENTER", justify: "CENTER" });
+  logo.primaryAxisSizingMode = "FIXED";
+  logo.counterAxisSizingMode = "FIXED";
+  logo.resize(72, 72);
+  radius(logo, "card");
+  fill(logo, "brand/primary");
+  if (ctx.es["shadow/brand-lg"]) await logo.setEffectStyleIdAsync(ctx.es["shadow/brand-lg"].id);
+  parent.appendChild(logo);
+  const ci = icon("Car", 38, "brand/on-primary");
+  if (ci) logo.appendChild(ci);
+}
+
 /* ------------------------------------------------------------- step 2 */
 
 async function step2() {
   await figma.setCurrentPageAsync(ctx.screensPage);
   clearScreens(["Login", "Set password", "Suspended"]);
-
-  async function authShell(name, route, x) {
-    const f = await screen(name, route, x, 0);
-    const b = V({ name: "Content", gap: 10, px: 32, align: "CENTER", justify: "CENTER" });
-    f.appendChild(b);
-    b.layoutSizingHorizontal = "FILL";
-    b.layoutSizingVertical = "FILL";
-    return { f, b };
-  }
-  function gap(parent, h) {
-    const s = figma.createFrame();
-    s.resize(1, h); s.fills = [];
-    parent.appendChild(s);
-  }
-  async function field(parent, label, iconName) {
-    const inp = H({ gap: 10, align: "CENTER", px: 14 });
-    inp.primaryAxisSizingMode = "FIXED";
-    inp.counterAxisSizingMode = "FIXED";
-    inp.resize(311, 48);
-    radius(inp, "control");
-    fill(inp, "bg/field");
-    stroke(inp, "border/field", 1.5);
-    parent.appendChild(inp);
-    inp.layoutSizingHorizontal = "FILL";
-    const gi = icon(iconName, 18, "text/secondary");
-    if (gi) inp.appendChild(gi);
-    await T(inp, label, "Body/Medium", "text/secondary");
-  }
-  async function button(parent, label, style) {
-    const btn = H({ align: "CENTER", justify: "CENTER", px: 20 });
-    btn.primaryAxisSizingMode = "FIXED";
-    btn.counterAxisSizingMode = "FIXED";
-    btn.resize(311, 48);
-    radius(btn, "control");
-    if (style === "secondary") {
-      fill(btn, "bg/surface");
-      stroke(btn, "border/field", 1.5);
-    } else {
-      fill(btn, "brand/primary");
-      if (ctx.es["shadow/brand-md"]) await btn.setEffectStyleIdAsync(ctx.es["shadow/brand-md"].id);
-    }
-    parent.appendChild(btn);
-    btn.layoutSizingHorizontal = "FILL";
-    await T(btn, label, "Label/Medium", style === "secondary" ? "text/muted" : "brand/on-primary",
-            { weight: "Semi Bold" });
-  }
-  async function brandMark(parent) {
-    const logo = H({ align: "CENTER", justify: "CENTER" });
-    logo.primaryAxisSizingMode = "FIXED";
-    logo.counterAxisSizingMode = "FIXED";
-    logo.resize(72, 72);
-    radius(logo, "card");
-    fill(logo, "brand/primary");
-    if (ctx.es["shadow/brand-lg"]) await logo.setEffectStyleIdAsync(ctx.es["shadow/brand-lg"].id);
-    parent.appendChild(logo);
-    const ci = icon("Car", 38, "brand/on-primary");
-    if (ci) logo.appendChild(ci);
-  }
 
   // Login
   {
@@ -927,11 +933,80 @@ async function step5() {
   return "Cleaner: 5 screens built.";
 }
 
+/* ------------------------------------------------------------- step 6 */
+// Password reset flow — designed here first, then implemented in code.
+
+async function step6() {
+  await figma.setCurrentPageAsync(ctx.screensPage);
+  clearScreens(["Forgot password", "Check your email", "New password"]);
+  const Y = 3600;
+
+  // 1. Request a reset link
+  {
+    const { b } = await authShell("Forgot password", "/forgot-password", 0, Y);
+    await brandMark(b);
+    gap(b, 8);
+    await T(b, "Reset your password", "Heading/H1", "text/primary",
+            { weight: "Extra Bold", align: "CENTER" });
+    await T(b, "Enter the email you sign in with and we'll send you a reset link.",
+            "Body/Small", "text/secondary", { align: "CENTER", fill: true });
+    gap(b, 8);
+    await field(b, "Email", "Mail");
+    gap(b, 4);
+    await button(b, "Send reset link");
+    gap(b, 2);
+    await T(b, "Back to sign in", "Label/Small", "brand/primary",
+            { weight: "Bold", align: "CENTER", fill: true });
+  }
+
+  // 2. Confirmation that the link was sent
+  {
+    const { b } = await authShell("Check your email", "/forgot-password/sent", 440, Y);
+    const ring = H({ align: "CENTER", justify: "CENTER" });
+    ring.primaryAxisSizingMode = "FIXED";
+    ring.counterAxisSizingMode = "FIXED";
+    ring.resize(80, 80);
+    radius(ring, "full");
+    fill(ring, "brand/tint");
+    b.appendChild(ring);
+    const mi = icon("Mail", 38, "brand/primary");
+    if (mi) ring.appendChild(mi);
+    gap(b, 8);
+    await T(b, "Check your email", "Heading/H1", "text/primary",
+            { weight: "Extra Bold", align: "CENTER" });
+    await T(b, "We sent a reset link to sergi@carwaj.app. It expires in 60 minutes.",
+            "Body/Small", "text/secondary", { align: "CENTER", fill: true });
+    gap(b, 10);
+    await button(b, "Back to sign in", "secondary");
+    gap(b, 2);
+    await T(b, "Didn't get it? Resend", "Label/Small", "brand/primary",
+            { weight: "Bold", align: "CENTER", fill: true });
+  }
+
+  // 3. Set the new password (reached via the emailed token)
+  {
+    const { b } = await authShell("New password", "/reset-password/[token]", 880, Y);
+    await brandMark(b);
+    gap(b, 8);
+    await T(b, "Choose a new password", "Heading/H1", "text/primary",
+            { weight: "Extra Bold", align: "CENTER" });
+    await T(b, "Must be at least 8 characters.", "Body/Small", "text/secondary",
+            { align: "CENTER", fill: true });
+    gap(b, 8);
+    await field(b, "New password", "Lock");
+    await field(b, "Confirm password", "Lock");
+    gap(b, 4);
+    await button(b, "Update password");
+  }
+
+  return "Password reset: 3 screens built (request, sent, new password).";
+}
+
 /* ------------------------------------------------------------------ run */
 
-const STEPS = { s1: step1, s2: step2, s3: step3, s4: step4, s5: step5 };
+const STEPS = { s1: step1, s2: step2, s3: step3, s4: step4, s5: step5, s6: step6 };
 
-figma.showUI(__html__, { width: 320, height: 430 });
+figma.showUI(__html__, { width: 320, height: 470 });
 
 figma.ui.onmessage = async (msg) => {
   if (msg.type !== "run") return;
@@ -939,7 +1014,7 @@ figma.ui.onmessage = async (msg) => {
     await boot();
     const results = [];
     const completed = [];
-    const order = msg.step === "all" ? ["s1", "s2", "s3", "s4", "s5"] : [msg.step];
+    const order = msg.step === "all" ? ["s1", "s2", "s3", "s4", "s5", "s6"] : [msg.step];
     for (const id of order) {
       results.push(await STEPS[id]());
       completed.push(id);
