@@ -123,8 +123,8 @@ export interface LandingCopy {
   ctaTitle: string;
   ctaSub: string;
   ctaBtn: string;
-  /** Pre-filled body of the wa.me message the CTA opens. */
-  ctaWaMessage: string;
+  /** Pre-filled subject of the email the CTA opens. */
+  ctaMessage: string;
   footerTagline: string;
   footerPlace: string;
 }
@@ -266,8 +266,8 @@ const en: LandingCopy = {
   a4Body:
     "Every payment in the company — collected, pending, overdue — with monthly revenue split by community and by cleaner.",
 
-  ctaBtn: "Message us on WhatsApp",
-  ctaWaMessage: "Hi Carwaj — I run a car wash company and I'd like to see a demo.",
+  ctaBtn: "Email us",
+  ctaMessage: "Hi Carwaj — I run a car wash company and I'd like to see a demo.",
   footerTagline: "Car care, organised.",
   footerPlace: "Dubai, UAE",
 };
@@ -409,8 +409,8 @@ const hi: LandingCopy = {
   a4Body:
     "कंपनी का हर भुगतान — वसूला हुआ, बाक़ी, देरी वाला — और महीने की कमाई कम्युनिटी तथा क्लीनर के हिसाब से बँटी हुई।",
 
-  ctaBtn: "व्हाट्सऐप पर संदेश भेजें",
-  ctaWaMessage: "नमस्ते Carwaj — मैं एक कार वॉश कंपनी चलाता/चलाती हूँ और डेमो देखना चाहता/चाहती हूँ।",
+  ctaBtn: "हमें ईमेल कीजिए",
+  ctaMessage: "नमस्ते Carwaj — मैं एक कार वॉश कंपनी चलाता/चलाती हूँ और डेमो देखना चाहता/चाहती हूँ।",
   footerTagline: "कार की देखभाल, व्यवस्थित।",
   footerPlace: "दुबई, यूएई",
 };
@@ -552,8 +552,8 @@ const bn: LandingCopy = {
   a4Body:
     "কোম্পানির প্রতিটি পেমেন্ট — আদায় হওয়া, বাকি, দেরি হওয়া — আর মাসিক আয় কমিউনিটি ও ক্লিনার অনুযায়ী ভাগ করা।",
 
-  ctaBtn: "হোয়াটসঅ্যাপে বার্তা পাঠান",
-  ctaWaMessage: "হ্যালো Carwaj — আমি একটি কার ওয়াশ কোম্পানি চালাই, ডেমো দেখতে চাই।",
+  ctaBtn: "আমাদের ইমেল করুন",
+  ctaMessage: "হ্যালো Carwaj — আমি একটি কার ওয়াশ কোম্পানি চালাই, ডেমো দেখতে চাই।",
   footerTagline: "গাড়ির যত্ন, গোছানো।",
   footerPlace: "দুবাই, সংযুক্ত আরব আমিরাত",
 };
@@ -695,8 +695,8 @@ const ur: LandingCopy = {
   a4Body:
     "کمپنی کی ہر ادائیگی — وصول شدہ، باقی، تاخیر والی — اور ماہانہ آمدنی کمیونٹی اور کلینر کے حساب سے تقسیم شدہ۔",
 
-  ctaBtn: "واٹس ایپ پر پیغام بھیجیں",
-  ctaWaMessage: "السلام علیکم Carwaj — میں ایک کار واش کمپنی چلاتا ہوں اور ڈیمو دیکھنا چاہتا ہوں۔",
+  ctaBtn: "ہمیں ای میل کریں",
+  ctaMessage: "السلام علیکم Carwaj — میں ایک کار واش کمپنی چلاتا ہوں اور ڈیمو دیکھنا چاہتا ہوں۔",
   footerTagline: "گاڑی کی دیکھ بھال، ترتیب سے۔",
   footerPlace: "دبئی، متحدہ عرب امارات",
 };
@@ -838,8 +838,8 @@ const pa: LandingCopy = {
   a4Body:
     "کمپنی دی ہر ادائیگی — وصول ہوئی، باقی، دیر والی — تے مہینے دی کمائی کمیونٹی تے کلینر دے حساب نال ونڈی ہوئی۔",
 
-  ctaBtn: "واٹس ایپ تے سنیہا بھیجو",
-  ctaWaMessage: "السلام علیکم Carwaj — میں اِک کار واش کمپنی چلاندا واں تے ڈیمو ویکھݨا چاہندا واں۔",
+  ctaBtn: "سانوں ای میل کرو",
+  ctaMessage: "السلام علیکم Carwaj — میں اِک کار واش کمپنی چلاندا واں تے ڈیمو ویکھݨا چاہندا واں۔",
   footerTagline: "گڈی دی سنبھال، ترتیب نال۔",
   footerPlace: "دبئی، متحدہ عرب امارات",
 };
@@ -981,8 +981,8 @@ const te: LandingCopy = {
   a4Body:
     "కంపెనీలోని ప్రతి చెల్లింపు — వసూలైనవి, పెండింగ్, ఆలస్యమైనవి — నెలవారీ ఆదాయం కమ్యూనిటీ, క్లీనర్ వారీగా విభజించి.",
 
-  ctaBtn: "వాట్సాప్‌లో సందేశం పంపండి",
-  ctaWaMessage: "హలో Carwaj — నేను ఒక కార్ వాష్ కంపెనీ నడుపుతున్నాను, డెమో చూడాలనుకుంటున్నాను.",
+  ctaBtn: "మాకు ఇమెయిల్ చేయండి",
+  ctaMessage: "హలో Carwaj — నేను ఒక కార్ వాష్ కంపెనీ నడుపుతున్నాను, డెమో చూడాలనుకుంటున్నాను.",
   footerTagline: "కారు సంరక్షణ, ఒక క్రమంలో.",
   footerPlace: "దుబాయ్, యూఏఈ",
 };
