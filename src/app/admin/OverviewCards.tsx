@@ -1,15 +1,6 @@
-"use client";
-
-import { useState } from "react";
-
-function ChevronDown({ open }: { open: boolean }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-      style={{ transition: "transform .2s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
-      <path d="M6 9l6 6 6-6" stroke="#9aa3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
+// No longer a client component: the breakdowns used to be collapsed behind a
+// chevron, so this needed useState. They are laid out on the page now, which
+// means no interactivity, no hooks, and no JS shipped for this view.
 
 function IconClock({ fg }: { fg: string }) {
   return (
@@ -37,66 +28,94 @@ function IconWallet({ fg }: { fg: string }) {
   );
 }
 
-function Card({
+const aed = (n: number) => `AED ${n.toLocaleString("en-US")}`;
+
+function StatCard({
   iconType,
   iconBg,
   iconFg,
   label,
   value,
-  expanded,
-  onToggle,
-  children,
+  sub,
 }: {
   iconType: "clock" | "calendar" | "wallet";
   iconBg: string;
   iconFg: string;
   label: string;
   value: string | number;
-  expanded: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
+  sub?: string;
 }) {
   return (
-    <div
-      className={`self-start rounded-[20px] bg-white border border-[#e6eaef] overflow-hidden transition-shadow ${
-        expanded ? "shadow-md" : ""
-      }`}
-    >
-      <button onClick={onToggle} className="w-full text-left p-[18px]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span
-              className="h-[30px] w-[30px] rounded-[9px] flex items-center justify-center"
-              style={{ backgroundColor: iconBg }}
-            >
-              {iconType === "clock" && <IconClock fg={iconFg} />}
-              {iconType === "calendar" && <IconCalendar fg={iconFg} />}
-              {iconType === "wallet" && <IconWallet fg={iconFg} />}
-            </span>
-            <span className="text-[12.5px] text-[#7b8696] font-semibold">{label}</span>
-          </div>
-          <ChevronDown open={expanded} />
-        </div>
-        <p className="text-[28px] font-extrabold tracking-[-0.04em] mt-3 tabular-nums">{value}</p>
-      </button>
-      <div
-        className={`grid transition-all duration-200 ease-out ${
-          expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-        }`}
-      >
-        <div className="overflow-hidden">
-          <div className="border-t border-line bg-gray-50 px-[18px] py-4">{children}</div>
-        </div>
+    <div className="rounded-[20px] bg-white border border-[#e6eaef] p-[18px]">
+      <div className="flex items-center gap-2">
+        <span
+          className="h-[30px] w-[30px] rounded-[9px] flex items-center justify-center shrink-0"
+          style={{ backgroundColor: iconBg }}
+        >
+          {iconType === "clock" && <IconClock fg={iconFg} />}
+          {iconType === "calendar" && <IconCalendar fg={iconFg} />}
+          {iconType === "wallet" && <IconWallet fg={iconFg} />}
+        </span>
+        <span className="text-[12.5px] text-[#7b8696] font-semibold">{label}</span>
       </div>
+      <p className="text-[28px] font-extrabold tracking-[-0.04em] mt-3 tabular-nums">{value}</p>
+      {sub && <p className="text-[12.5px] text-[#7b8696] mt-1">{sub}</p>}
     </div>
   );
 }
 
-function BreakdownRow({ label, value }: { label: string; value: string | number }) {
+/** Ranked rows with a bar scaled to the largest value, so the leader is
+ *  obvious without reading any numbers. */
+function BreakdownPanel({
+  title,
+  rows,
+  format,
+  emptyText,
+  avatars = false,
+}: {
+  title: string;
+  rows: Record<string, number>;
+  format: (n: number) => string;
+  emptyText: string;
+  avatars?: boolean;
+}) {
+  const entries = Object.entries(rows).sort((a, b) => b[1] - a[1]);
+  const max = entries.length ? entries[0][1] : 0;
+
   return (
-    <div className="flex items-center justify-between text-sm py-1">
-      <span className="text-gray-600">{label}</span>
-      <span className="font-semibold font-mono">{value}</span>
+    <div className="rounded-[20px] bg-white border border-[#e6eaef] p-[18px] self-start">
+      <p className="text-[11.5px] font-bold uppercase tracking-wide text-[#7b8696]">{title}</p>
+      {entries.length === 0 ? (
+        <p className="text-sm text-gray-400 mt-3">{emptyText}</p>
+      ) : (
+        <div className={avatars ? "mt-3 space-y-2.5" : "mt-3 space-y-3"}>
+          {entries.map(([name, amount]) => (
+            <div key={name}>
+              <div className="flex items-center justify-between gap-3">
+                <span className="flex items-center gap-2 min-w-0">
+                  {avatars && (
+                    <span className="h-6 w-6 shrink-0 rounded-full bg-ink text-white flex items-center justify-center text-[10px] font-bold">
+                      {name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="truncate text-[13.5px] font-semibold">{name}</span>
+                </span>
+                <span className="shrink-0 font-mono text-[12.5px] font-bold tabular-nums">
+                  {format(amount)}
+                </span>
+              </div>
+              {!avatars && (
+                <div className="mt-1.5 h-1.5 rounded-full bg-[#eef1f5] overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-blue-600"
+                    style={{ width: max > 0 ? `${Math.max((amount / max) * 100, 4)}%` : "0%" }}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -120,67 +139,54 @@ export default function OverviewCards({
   revenueByCommunity: Record<string, number>;
   revenueByCleaner: Record<string, number>;
 }) {
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
-
-  function toggle(card: string) {
-    setExpandedCard((prev) => (prev === card ? null : card));
-  }
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-start">
-      <Card
-        iconType="clock"
-        iconBg="#e8f0fe"
-        iconFg="#2563eb"
-        label="Jobs Today"
-        value={jobsToday}
-        expanded={expandedCard === "today"}
-        onToggle={() => toggle("today")}
-      >
-        <BreakdownRow label="Cars to wash" value={toWashToday} />
-        <BreakdownRow label="Cars washed" value={washedToday} />
-      </Card>
+    <div className="space-y-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <StatCard
+          iconType="clock"
+          iconBg="#e8f0fe"
+          iconFg="#2563eb"
+          label="Jobs Today"
+          value={jobsToday}
+          sub={`${toWashToday} to wash · ${washedToday} washed`}
+        />
+        <StatCard
+          iconType="calendar"
+          iconBg="#e7f7ee"
+          iconFg="#16a34a"
+          label="Jobs This Week"
+          value={jobsThisWeek}
+        />
+        <StatCard
+          iconType="wallet"
+          iconBg="#fdeccf"
+          iconFg="#d97706"
+          label="Revenue This Month"
+          value={aed(revenueThisMonth)}
+        />
+      </div>
 
-      <Card
-        iconType="calendar"
-        iconBg="#e7f7ee"
-        iconFg="#16a34a"
-        label="Jobs This Week"
-        value={jobsThisWeek}
-        expanded={expandedCard === "week"}
-        onToggle={() => toggle("week")}
-      >
-        {Object.keys(weekByCommunity).length === 0 ? (
-          <p className="text-sm text-gray-400">No jobs this week.</p>
-        ) : (
-          Object.entries(weekByCommunity)
-            .sort((a, b) => b[1] - a[1])
-            .map(([name, count]) => <BreakdownRow key={name} label={name} value={count} />)
-        )}
-      </Card>
-
-      <Card
-        iconType="wallet"
-        iconBg="#fdeccf"
-        iconFg="#d97706"
-        label="Revenue This Month"
-        value={`AED ${revenueThisMonth.toLocaleString()}`}
-        expanded={expandedCard === "revenue"}
-        onToggle={() => toggle("revenue")}
-      >
-        <p className="text-xs font-semibold text-gray-400 uppercase mb-1">By community</p>
-        {Object.entries(revenueByCommunity)
-          .sort((a, b) => b[1] - a[1])
-          .map(([name, amount]) => (
-            <BreakdownRow key={name} label={name} value={`AED ${amount.toLocaleString()}`} />
-          ))}
-        <p className="text-xs font-semibold text-gray-400 uppercase mb-1 mt-3">By cleaner</p>
-        {Object.entries(revenueByCleaner)
-          .sort((a, b) => b[1] - a[1])
-          .map(([name, amount]) => (
-            <BreakdownRow key={name} label={name} value={`AED ${amount.toLocaleString()}`} />
-          ))}
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 items-start">
+        <BreakdownPanel
+          title="Jobs this week by community"
+          rows={weekByCommunity}
+          format={(n) => String(n)}
+          emptyText="No jobs this week."
+        />
+        <BreakdownPanel
+          title="Revenue by community"
+          rows={revenueByCommunity}
+          format={aed}
+          emptyText="No active subscriptions."
+        />
+        <BreakdownPanel
+          title="Revenue by cleaner"
+          rows={revenueByCleaner}
+          format={aed}
+          emptyText="No active subscriptions."
+          avatars
+        />
+      </div>
     </div>
   );
 }
