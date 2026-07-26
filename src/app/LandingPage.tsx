@@ -9,9 +9,7 @@ import { LANDING } from "@/lib/landingCopy";
 // Hindi in the app lands on a Hindi marketing page.
 const LS_KEY = "carwaj_lang";
 
-// Business WhatsApp number in international format, digits only (no +, no spaces)
-// — this is what wa.me expects. TODO: replace with the real Carwaj number.
-const WHATSAPP_NUMBER = "971500000000";
+const CONTACT_EMAIL = "hello@carwaj.app";
 
 const LANGS = Object.keys(LANG_NAMES) as Lang[];
 
@@ -831,18 +829,17 @@ export default function LandingPage() {
           <h2 className="text-[28px] font-extrabold tracking-[-0.035em] text-white sm:text-[38px]">{c.ctaTitle}</h2>
           <p className="mx-auto mt-4 max-w-xl text-[16px] leading-relaxed text-[#94a3b8]">{c.ctaSub}</p>
           <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(c.ctaWaMessage)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-9 inline-flex h-12 items-center gap-2.5 rounded-control bg-[#25d366] px-7 text-[15px] font-bold text-[#0b3d2c] transition-colors hover:bg-[#1fbe5a]"
+            href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(c.ctaMessage)}`}
+            className="mt-9 inline-flex h-12 items-center gap-2.5 rounded-control bg-blue-600 px-7 text-[15px] font-bold text-white transition-colors hover:bg-[#1d4ed8]"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm5.2 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.5-.6-2.7-1.2-4.4-3.9-4.5-4.1-.1-.2-1.1-1.4-1.1-2.6 0-1.2.6-1.8.9-2.1.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .6l-.3.4-.4.4c-.1.1-.3.3-.1.6.2.3.7 1.2 1.6 2 1.1.9 1.9 1.2 2.2 1.4.3.1.5.1.6-.1l.9-1c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.5.3 0 .1 0 .7-.3 1.3Z" />
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+              <rect x="2.5" y="4.5" width="19" height="15" rx="3" strokeWidth="1.8" />
+              <path d="M3.5 7l8.5 6 8.5-6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {c.ctaBtn}
           </a>
           <p className="mt-4 font-mono text-[13px] text-[#94a3b8]" dir="ltr">
-            +{WHATSAPP_NUMBER.replace(/^(\d{3})(\d{2})(\d+)$/, "$1 $2 $3")}
+            {CONTACT_EMAIL}
           </p>
         </div>
       </section>
