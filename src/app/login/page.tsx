@@ -118,6 +118,12 @@ export default function LoginPage() {
           {loading ? "Signing in…" : "Sign in"}
         </button>
 
+        <p className="mt-5 text-center text-[13px]">
+          <a href="/forgot-password" className="font-semibold text-[#7b8696] hover:text-blue-600">
+            Forgot your password?
+          </a>
+        </p>
+
       </form>
 
       <p className="mt-[22px] text-[#9aa3af] text-[12.5px]">Carwaj · car care, organised</p>
