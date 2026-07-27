@@ -1320,11 +1320,14 @@ async function step8() {
     t.fontSize = size;
     t.lineHeight = { unit: "PIXELS", value: Math.round(size * 1.12) };
     t.letterSpacing = { unit: "PERCENT", value: -2.5 };
-    parent.appendChild(t);
+    // textAutoResize must be HEIGHT *before* asking for FILL. In the default
+    // WIDTH_AND_HEIGHT mode Figma ignores FILL and collapses the node to a
+    // near-zero-width thread, taking every hugging ancestor down with it.
+    t.textAutoResize = "HEIGHT";
     t.fills = [paint(o.token || "text/primary")];
     if (o.align) t.textAlignHorizontal = o.align;
+    parent.appendChild(t);
     t.layoutSizingHorizontal = "FILL";
-    t.textAutoResize = "HEIGHT";
     return t;
   }
 
@@ -1335,11 +1338,11 @@ async function step8() {
     t.characters = text;
     t.fontSize = size || 16.5;
     t.lineHeight = { unit: "PIXELS", value: Math.round((size || 16.5) * 1.6) };
-    parent.appendChild(t);
+    t.textAutoResize = "HEIGHT";
     t.fills = [paint(o.token || "text/muted")];
     if (o.align) t.textAlignHorizontal = o.align;
+    parent.appendChild(t);
     t.layoutSizingHorizontal = "FILL";
-    t.textAutoResize = "HEIGHT";
     return t;
   }
 
@@ -1350,11 +1353,11 @@ async function step8() {
     t.fontSize = 13;
     t.lineHeight = { unit: "PIXELS", value: 18 };
     t.letterSpacing = { unit: "PERCENT", value: 12 };
-    parent.appendChild(t);
+    t.textAutoResize = "HEIGHT";
     t.fills = [paint("brand/primary")];
     if (align) t.textAlignHorizontal = align;
+    parent.appendChild(t);
     t.layoutSizingHorizontal = "FILL";
-    t.textAutoResize = "HEIGHT";
     return t;
   }
 
@@ -1368,10 +1371,13 @@ async function step8() {
 
     const inner = V({ name: "Container", gap: 16 });
     inner.fills = [];
-    inner.primaryAxisSizingMode = "AUTO";
-    inner.counterAxisSizingMode = "FIXED";
-    inner.resize(INNER, 10);
     outer.appendChild(inner);
+    // resize() resets both sizing modes to FIXED, so it must come first —
+    // setting AUTO before it locks the height at the placeholder value and
+    // flattens the whole band to a hairline.
+    inner.resize(INNER, 10);
+    inner.counterAxisSizingMode = "FIXED";
+    inner.primaryAxisSizingMode = "AUTO";
     return inner;
   }
 
@@ -1379,10 +1385,10 @@ async function step8() {
   async function sectionIntro(inner, eb, title, sub) {
     const head = V({ gap: 12 });
     head.fills = [];
-    head.primaryAxisSizingMode = "AUTO";
-    head.counterAxisSizingMode = "FIXED";
     inner.appendChild(head);
     head.resize(680, 10);
+    head.counterAxisSizingMode = "FIXED";
+    head.primaryAxisSizingMode = "AUTO";
     await eyebrow(head, eb);
     await heading(head, title, 40);
     if (sub) await para(head, sub, 16.5);
@@ -1521,18 +1527,18 @@ async function step8() {
 
     const title = V({ gap: 0 });
     title.fills = [];
-    title.primaryAxisSizingMode = "AUTO";
-    title.counterAxisSizingMode = "FIXED";
     inner.appendChild(title);
     title.resize(900, 10);
+    title.counterAxisSizingMode = "FIXED";
+    title.primaryAxisSizingMode = "AUTO";
     await heading(title, "Run every wash without the spreadsheet.", 58, { align: "CENTER" });
 
     const sub = V({ gap: 0 });
     sub.fills = [];
-    sub.primaryAxisSizingMode = "AUTO";
-    sub.counterAxisSizingMode = "FIXED";
     inner.appendChild(sub);
     sub.resize(720, 10);
+    sub.counterAxisSizingMode = "FIXED";
+    sub.primaryAxisSizingMode = "AUTO";
     await para(sub, "Carwaj puts today's round in your cleaners' pockets, keeps your clients updated on WhatsApp, and shows the office what every villa is worth.", 17.5, { align: "CENTER" });
 
     const ctas = H({ gap: 12, align: "CENTER" });
@@ -1730,10 +1736,10 @@ async function step8() {
 
     const t = V({ gap: 12 });
     t.fills = [];
-    t.primaryAxisSizingMode = "AUTO";
-    t.counterAxisSizingMode = "FIXED";
     inner.appendChild(t);
     t.resize(760, 10);
+    t.counterAxisSizingMode = "FIXED";
+    t.primaryAxisSizingMode = "AUTO";
     await heading(t, "See it on your own routes", 40, { align: "CENTER" });
     await para(t, "Tell us the communities you cover and we'll set up a demo company with your villas, so you can try it with real names and real rounds.", 16.5, { align: "CENTER" });
 
@@ -1768,9 +1774,33 @@ async function step8() {
   fMeta.fills = [paint("text/secondary")];
   footer.appendChild(fMeta);
 
-  // No node.screenshot() here — that is a convenience of the Figma MCP tool,
-  // not the Plugin API, and calling it in a real plugin throws "not a function".
-  return "Landing page rebuilt at " + W + "px: nav, hero, WhatsApp, screens, admin, 6 features + 2 strip cards, 4 steps, CTA, footer.";
+  // Self-check. This step cannot be eyeballed from outside Figma, and the two
+  // ways it has broken so far — text collapsing to a zero-width thread, and
+  // resize() locking a container's height — are both invisible to a syntax
+  // check but obvious in the geometry. Report it rather than assume.
+  const collapsedText = [];
+  for (const n of page.findAll(function (x) { return x.type === "TEXT"; })) {
+    if (n.width < 20 || n.height < 6) {
+      collapsedText.push('"' + n.characters.slice(0, 24) + '" ' +
+                         Math.round(n.width) + "x" + Math.round(n.height));
+    }
+  }
+  const shortBands = [];
+  for (const b of page.children) {
+    if (b.type === "FRAME" && b.height < 60 && b.name !== "Footer" && b.name !== "Nav") {
+      shortBands.push(b.name + " " + Math.round(b.height) + "px");
+    }
+  }
+
+  let report = "Landing page rebuilt — " + Math.round(page.width) + "x" +
+               Math.round(page.height) + ", " + page.children.length + " sections.";
+  report += collapsedText.length
+    ? "\n⚠ " + collapsedText.length + " collapsed text node(s): " + collapsedText.slice(0, 4).join(" | ")
+    : "\n✓ no collapsed text";
+  report += shortBands.length
+    ? "\n⚠ short band(s): " + shortBands.join(" | ")
+    : "\n✓ all bands have height";
+  return report;
 }
 
 /* ------------------------------------------------------------------ run */
