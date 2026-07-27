@@ -1439,7 +1439,8 @@ async function step8() {
   await T(footer, "Carwaj", "Heading/H3", "text/inverse", { weight: "Extra Bold" });
   await T(footer, "carwaj.app · hello@carwaj.app", "Caption", "text/secondary");
 
-  await page.screenshot();
+  // No node.screenshot() here — that is a convenience of the Figma MCP tool,
+  // not the Plugin API, and calling it in a real plugin throws "not a function".
   return "Landing page built at " + W + "px wide (nav, hero, 5 bands, CTA, footer).";
 }
 
