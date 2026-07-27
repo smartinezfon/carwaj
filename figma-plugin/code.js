@@ -1296,6 +1296,8 @@ async function step8() {
   }
 
   const W = 1440;
+  const INNER = 1152; // matches max-w-6xl on the real page
+
   const page = figma.createFrame();
   page.name = "Landing page  ·  /";
   page.resize(W, 100);
@@ -1307,37 +1309,147 @@ async function step8() {
   fill(page, "bg/canvas");
   ctx.screensPage.appendChild(page);
 
-  async function band(name, bgToken, padY) {
-    const s = V({ name: name, gap: 18, align: "CENTER" });
-    s.paddingTop = padY; s.paddingBottom = padY;
-    s.paddingLeft = 220; s.paddingRight = 220;
-    fill(s, bgToken);
-    page.appendChild(s);
-    s.layoutSizingHorizontal = "FILL";
-    return s;
-  }
-  async function eyebrow(parent, text) {
-    return T(parent, text, "Micro/Upper", "brand/primary", { weight: "Semi Bold", align: "CENTER" });
-  }
-  async function bigTitle(parent, text) {
-    const t = await T(parent, text, "Display", "text/primary", { weight: "Extra Bold", align: "CENTER" });
-    t.fontSize = 44;
-    t.layoutSizingHorizontal = "FILL";
-    t.textAutoResize = "HEIGHT";
-    return t;
-  }
-  async function lede(parent, text) {
-    const t = await T(parent, text, "Body/Large", "text/muted", { align: "CENTER" });
+  // Headings set their own font metrics rather than borrowing a text style.
+  // The Display style is locked to a 28px line height, so a 60px hero title
+  // rendered through it collides with its own second line.
+  async function heading(parent, text, size, opts) {
+    const o = opts || {};
+    const t = figma.createText();
+    t.fontName = { family: "Inter", style: o.weight || "Extra Bold" };
+    t.characters = text;
+    t.fontSize = size;
+    t.lineHeight = { unit: "PIXELS", value: Math.round(size * 1.12) };
+    t.letterSpacing = { unit: "PERCENT", value: -2.5 };
+    parent.appendChild(t);
+    t.fills = [paint(o.token || "text/primary")];
+    if (o.align) t.textAlignHorizontal = o.align;
     t.layoutSizingHorizontal = "FILL";
     t.textAutoResize = "HEIGHT";
     return t;
   }
 
-  // ---- Nav ----
-  const nav = H({ name: "Nav", justify: "SPACE_BETWEEN", align: "CENTER", px: 60, py: 18 });
-  fill(nav, "bg/surface");
+  async function para(parent, text, size, opts) {
+    const o = opts || {};
+    const t = figma.createText();
+    t.fontName = { family: "Inter", style: "Regular" };
+    t.characters = text;
+    t.fontSize = size || 16.5;
+    t.lineHeight = { unit: "PIXELS", value: Math.round((size || 16.5) * 1.6) };
+    parent.appendChild(t);
+    t.fills = [paint(o.token || "text/muted")];
+    if (o.align) t.textAlignHorizontal = o.align;
+    t.layoutSizingHorizontal = "FILL";
+    t.textAutoResize = "HEIGHT";
+    return t;
+  }
+
+  async function eyebrow(parent, text, align) {
+    const t = figma.createText();
+    t.fontName = { family: "Inter", style: "Bold" };
+    t.characters = text.toUpperCase();
+    t.fontSize = 13;
+    t.lineHeight = { unit: "PIXELS", value: 18 };
+    t.letterSpacing = { unit: "PERCENT", value: 12 };
+    parent.appendChild(t);
+    t.fills = [paint("brand/primary")];
+    if (align) t.textAlignHorizontal = align;
+    t.layoutSizingHorizontal = "FILL";
+    t.textAutoResize = "HEIGHT";
+    return t;
+  }
+
+  // A full-bleed colour band with a fixed-width content column inside it.
+  function band(name, bgToken, padY) {
+    const outer = V({ name: name, gap: 0, align: "CENTER" });
+    outer.paddingTop = padY; outer.paddingBottom = padY;
+    fill(outer, bgToken);
+    page.appendChild(outer);
+    outer.layoutSizingHorizontal = "FILL";
+
+    const inner = V({ name: "Container", gap: 16 });
+    inner.fills = [];
+    inner.primaryAxisSizingMode = "AUTO";
+    inner.counterAxisSizingMode = "FIXED";
+    inner.resize(INNER, 10);
+    outer.appendChild(inner);
+    return inner;
+  }
+
+  // Left-aligned section intro, capped at ~2/3 width like max-w-2xl.
+  async function sectionIntro(inner, eb, title, sub) {
+    const head = V({ gap: 12 });
+    head.fills = [];
+    head.primaryAxisSizingMode = "AUTO";
+    head.counterAxisSizingMode = "FIXED";
+    inner.appendChild(head);
+    head.resize(680, 10);
+    await eyebrow(head, eb);
+    await heading(head, title, 40);
+    if (sub) await para(head, sub, 16.5);
+  }
+
+  function grid(inner, perRow, gapPx) {
+    const rows = [];
+    return {
+      add: function (cellBuilder, index) {
+        if (index % perRow === 0) {
+          const r = H({ gap: gapPx });
+          r.fills = [];
+          inner.appendChild(r);
+          r.layoutSizingHorizontal = "FILL";
+          rows.push(r);
+        }
+        return rows[rows.length - 1];
+      },
+    };
+  }
+
+  async function infoCard(parent, iconName, title, bodyText, opts) {
+    const o = opts || {};
+    const c = V({ gap: 10, pad: 24 });
+    radius(c, "card");
+    fill(c, o.bg || "bg/surface");
+    stroke(c, "border/default", 1);
+    parent.appendChild(c);
+    c.layoutSizingHorizontal = "FILL";
+
+    if (o.number) {
+      const chip = H({ align: "CENTER", justify: "CENTER" });
+      chip.primaryAxisSizingMode = "FIXED";
+      chip.counterAxisSizingMode = "FIXED";
+      chip.resize(40, 40);
+      radius(chip, "full");
+      fill(chip, "text/primary");
+      c.appendChild(chip);
+      const n = figma.createText();
+      n.fontName = { family: "Inter", style: "Bold" };
+      n.characters = o.number;
+      n.fontSize = 15;
+      n.fills = [paint("text/inverse")];
+      chip.appendChild(n);
+    } else if (iconName) {
+      const chip = H({ align: "CENTER", justify: "CENTER" });
+      chip.primaryAxisSizingMode = "FIXED";
+      chip.counterAxisSizingMode = "FIXED";
+      chip.resize(44, 44);
+      radius(chip, "control");
+      fill(chip, o.darkChip ? "text/primary" : "brand/tint");
+      c.appendChild(chip);
+      const gi = icon(iconName, 22, o.darkChip ? "text/inverse" : "brand/primary");
+      if (gi) chip.appendChild(gi);
+    }
+
+    await heading(c, title, 17);
+    await para(c, bodyText, 14.5);
+    return c;
+  }
+
+  /* ---------------------------------------------------------------- Nav */
+  const nav = H({ name: "Nav", justify: "SPACE_BETWEEN", align: "CENTER", px: 144, py: 16 });
+  fill(nav, "bg/canvas");
   page.appendChild(nav);
   nav.layoutSizingHorizontal = "FILL";
+
   const brand = H({ gap: 10, align: "CENTER" });
   brand.fills = [];
   nav.appendChild(brand);
@@ -1350,98 +1462,315 @@ async function step8() {
   brand.appendChild(mark);
   const navIcon = icon("Car", 20, "brand/on-primary");
   if (navIcon) mark.appendChild(navIcon);
-  await T(brand, "Carwaj", "Heading/H2", "text/primary", { weight: "Extra Bold" });
+  const brandName = figma.createText();
+  brandName.fontName = { family: "Inter", style: "Extra Bold" };
+  brandName.characters = "Carwaj";
+  brandName.fontSize = 19;
+  brandName.fills = [paint("text/primary")];
+  brand.appendChild(brandName);
 
   const links = H({ gap: 28, align: "CENTER" });
   links.fills = [];
   nav.appendChild(links);
   for (const l of ["WhatsApp", "Features", "How it works"]) {
-    await T(links, l, "Label/Medium", "text/muted", { weight: "Semi Bold" });
+    const t = figma.createText();
+    t.fontName = { family: "Inter", style: "Semi Bold" };
+    t.characters = l;
+    t.fontSize = 14.5;
+    t.fills = [paint("text/muted")];
+    links.appendChild(t);
   }
-  const signIn = H({ align: "CENTER", justify: "CENTER", px: 18, py: 9 });
+  const signIn = H({ align: "CENTER", justify: "CENTER", px: 18, py: 10 });
   radius(signIn, "control");
   fill(signIn, "text/primary");
   nav.appendChild(signIn);
-  await T(signIn, "Sign in", "Label/Medium", "text/inverse", { weight: "Semi Bold" });
+  const signInT = figma.createText();
+  signInT.fontName = { family: "Inter", style: "Semi Bold" };
+  signInT.characters = "Sign in";
+  signInT.fontSize = 14.5;
+  signInT.fills = [paint("text/inverse")];
+  signIn.appendChild(signInT);
 
-  // ---- Hero ----
-  const hero = await band("Hero", "bg/canvas", 80);
-  const badge = H({ gap: 7, align: "CENTER", px: 14, py: 7 });
-  radius(badge, "full");
-  fill(badge, "bg/surface");
-  stroke(badge, "border/subtle", 1);
-  hero.appendChild(badge);
-  const dot = figma.createEllipse();
-  dot.resize(7, 7);
-  fill(dot, "status/completed/dot");
-  badge.appendChild(dot);
-  await T(badge, "Built for car wash companies in the UAE", "Label/Small", "text/muted", { weight: "Bold" });
+  const navLine = figma.createRectangle();
+  navLine.resize(W, 1);
+  fill(navLine, "border/default");
+  page.appendChild(navLine);
+  navLine.layoutSizingHorizontal = "FILL";
 
-  const heroTitle = await T(hero, "Run every wash without the spreadsheet.",
-    "Display", "text/primary", { weight: "Extra Bold", align: "CENTER" });
-  heroTitle.fontSize = 60;
-  heroTitle.layoutSizingHorizontal = "FILL";
-  heroTitle.textAutoResize = "HEIGHT";
+  /* --------------------------------------------------------------- Hero */
+  {
+    const inner = band("Hero", "bg/canvas", 88);
+    inner.counterAxisAlignItems = "CENTER";
+    inner.itemSpacing = 20;
 
-  await lede(hero, "Carwaj puts today's round in your cleaners' pockets, keeps your clients updated on WhatsApp, and shows the office what every villa is worth.");
+    const badge = H({ gap: 8, align: "CENTER", px: 14, py: 7 });
+    radius(badge, "full");
+    fill(badge, "bg/surface");
+    stroke(badge, "border/default", 1);
+    inner.appendChild(badge);
+    const dot = figma.createEllipse();
+    dot.resize(7, 7);
+    fill(dot, "status/completed/dot");
+    badge.appendChild(dot);
+    const bt = figma.createText();
+    bt.fontName = { family: "Inter", style: "Bold" };
+    bt.characters = "Built for car wash companies in the UAE";
+    bt.fontSize = 13;
+    bt.fills = [paint("text/muted")];
+    badge.appendChild(bt);
 
-  const ctas = H({ gap: 12, align: "CENTER" });
-  ctas.fills = [];
-  hero.appendChild(ctas);
-  const demo = H({ align: "CENTER", justify: "CENTER", px: 26, py: 14 });
-  radius(demo, "control");
-  fill(demo, "brand/primary");
-  if (ctx.es["shadow/brand-md"]) await demo.setEffectStyleIdAsync(ctx.es["shadow/brand-md"].id);
-  ctas.appendChild(demo);
-  await T(demo, "Book a demo", "Label/Medium", "brand/on-primary", { weight: "Semi Bold" });
-  const secondary = H({ align: "CENTER", justify: "CENTER", px: 26, py: 14 });
-  radius(secondary, "control");
-  fill(secondary, "bg/surface");
-  stroke(secondary, "border/field", 1.5);
-  ctas.appendChild(secondary);
-  await T(secondary, "Sign in", "Label/Medium", "text/primary", { weight: "Semi Bold" });
-  await T(hero, "No card needed · Set up in an afternoon", "Caption", "text/secondary", { align: "CENTER" });
+    const title = V({ gap: 0 });
+    title.fills = [];
+    title.primaryAxisSizingMode = "AUTO";
+    title.counterAxisSizingMode = "FIXED";
+    inner.appendChild(title);
+    title.resize(900, 10);
+    await heading(title, "Run every wash without the spreadsheet.", 58, { align: "CENTER" });
 
-  // ---- Content bands ----
-  const BANDS = [
-    ["WhatsApp", "bg/surface", "WhatsApp, built in", "Your clients never download anything",
-     "Every update reaches the owner where they already are. Five messages go out on their own, from your company's WhatsApp Business number."],
-    ["Screens", "bg/canvas", "The app", "Four screens, nothing to learn",
-     "The whole day fits under a cleaner's thumb. The whole month fits on one page."],
-    ["Admin", "bg/surface", "For the office", "The owner sees the whole company",
-     "Cleaners get a phone. Admins get a desktop dashboard — every community, every villa, every cleaner and every dirham, without ringing anyone to ask how the day went."],
-    ["Features", "bg/canvas", "Features", "Everything the operation needs", ""],
-    ["How it works", "bg/surface", "How it works", "Live by the end of the week", ""],
-  ];
-  for (const [name, bg, eb, title, sub] of BANDS) {
-    const s = await band(name, bg, 70);
-    await eyebrow(s, eb);
-    await bigTitle(s, title);
-    if (sub) await lede(s, sub);
+    const sub = V({ gap: 0 });
+    sub.fills = [];
+    sub.primaryAxisSizingMode = "AUTO";
+    sub.counterAxisSizingMode = "FIXED";
+    inner.appendChild(sub);
+    sub.resize(720, 10);
+    await para(sub, "Carwaj puts today's round in your cleaners' pockets, keeps your clients updated on WhatsApp, and shows the office what every villa is worth.", 17.5, { align: "CENTER" });
+
+    const ctas = H({ gap: 12, align: "CENTER" });
+    ctas.fills = [];
+    inner.appendChild(ctas);
+    const demo = H({ align: "CENTER", justify: "CENTER", px: 26, py: 14 });
+    radius(demo, "control");
+    fill(demo, "brand/primary");
+    if (ctx.es["shadow/brand-md"]) await demo.setEffectStyleIdAsync(ctx.es["shadow/brand-md"].id);
+    ctas.appendChild(demo);
+    const demoT = figma.createText();
+    demoT.fontName = { family: "Inter", style: "Bold" };
+    demoT.characters = "Book a demo";
+    demoT.fontSize = 15;
+    demoT.fills = [paint("brand/on-primary")];
+    demo.appendChild(demoT);
+
+    const alt = H({ align: "CENTER", justify: "CENTER", px: 26, py: 14 });
+    radius(alt, "control");
+    fill(alt, "bg/surface");
+    stroke(alt, "border/field", 1.5);
+    ctas.appendChild(alt);
+    const altT = figma.createText();
+    altT.fontName = { family: "Inter", style: "Bold" };
+    altT.characters = "Sign in";
+    altT.fontSize = 15;
+    altT.fills = [paint("text/primary")];
+    alt.appendChild(altT);
+
+    const note = figma.createText();
+    note.fontName = { family: "Inter", style: "Regular" };
+    note.characters = "No card needed · Set up in an afternoon";
+    note.fontSize = 13;
+    note.fills = [paint("text/secondary")];
+    inner.appendChild(note);
   }
 
-  // ---- CTA ----
-  const cta = await band("CTA", "bg/canvas", 70);
-  await bigTitle(cta, "See it on your own routes");
-  await lede(cta, "Tell us the communities you cover and we'll set up a demo company with your villas, so you can try it with real names and real rounds.");
-  const ctaBtn = H({ align: "CENTER", justify: "CENTER", px: 26, py: 14 });
-  radius(ctaBtn, "control");
-  fill(ctaBtn, "brand/primary");
-  if (ctx.es["shadow/brand-md"]) await ctaBtn.setEffectStyleIdAsync(ctx.es["shadow/brand-md"].id);
-  cta.appendChild(ctaBtn);
-  await T(ctaBtn, "Book a demo", "Label/Medium", "brand/on-primary", { weight: "Semi Bold" });
+  /* ----------------------------------------------------------- WhatsApp */
+  {
+    const inner = band("WhatsApp", "bg/surface", 80);
+    await sectionIntro(inner, "WhatsApp, built in", "Your clients never download anything",
+      "Every update reaches the owner where they already are. Five messages go out on their own, from your company's WhatsApp Business number.");
 
-  // ---- Footer ----
-  const footer = H({ name: "Footer", justify: "SPACE_BETWEEN", align: "CENTER", px: 60, py: 28 });
+    const chat = V({ gap: 10, pad: 22 });
+    radius(chat, "card");
+    fill(chat, "bg/subtle");
+    stroke(chat, "border/default", 1);
+    inner.appendChild(chat);
+    chat.layoutSizingHorizontal = "FILL";
+    const MSGS = [
+      "Your car wash is scheduled for tomorrow, 07:00–09:00.",
+      "Ravi is on his way to Villa 214.",
+      "All done — here's the after photo.",
+      "Your March payment of AED 450 is due on the 5th.",
+      "Payment received. Thank you!",
+    ];
+    for (const m of MSGS) {
+      const bubble = H({ px: 14, py: 10 });
+      radius(bubble, "card");
+      fill(bubble, "accent/schedule/bg");
+      chat.appendChild(bubble);
+      const t = figma.createText();
+      t.fontName = { family: "Inter", style: "Regular" };
+      t.characters = m;
+      t.fontSize = 14;
+      t.fills = [paint("text/primary")];
+      bubble.appendChild(t);
+    }
+  }
+
+  /* ------------------------------------------------------------ Screens */
+  {
+    const inner = band("Screens", "bg/canvas", 80);
+    await sectionIntro(inner, "The app", "Four screens, nothing to learn",
+      "The whole day fits under a cleaner's thumb. The whole month fits on one page.");
+
+    const row = H({ gap: 20 });
+    row.fills = [];
+    inner.appendChild(row);
+    row.layoutSizingHorizontal = "FILL";
+    const SCREENS = [
+      ["Calendar", "Calendar", "Every day dotted by status. Tap one to see the full round, grouped by community."],
+      ["User", "Clients", "Villas, owners, cars and schedules — active, paused and former kept apart."],
+      ["Payments", "Payments", "Pending and paid, overdue days counted, cash or transfer in a single tap."],
+    ];
+    for (const [ic, title, bodyText] of SCREENS) {
+      await infoCard(row, ic, title, bodyText);
+    }
+  }
+
+  /* -------------------------------------------------------------- Admin */
+  {
+    const inner = band("Admin", "bg/surface", 80);
+    await sectionIntro(inner, "For the office", "The owner sees the whole company",
+      "Cleaners get a phone. Admins get a desktop dashboard — every community, every villa, every cleaner and every dirham, without ringing anyone to ask how the day went.");
+
+    const mock = H({ gap: 16, pad: 22 });
+    radius(mock, "card");
+    fill(mock, "bg/subtle");
+    stroke(mock, "border/default", 1);
+    inner.appendChild(mock);
+    mock.layoutSizingHorizontal = "FILL";
+    const STATS = [
+      ["Villas", "128", null],
+      ["Cars", "196", null],
+      ["Jobs today", "30", "green/600"],
+      ["Revenue / mo", "AED 42k", "amber/600"],
+    ];
+    for (const [label, value, tone] of STATS) {
+      const c = V({ gap: 6, pad: 18 });
+      radius(c, "md");
+      fill(c, "bg/surface");
+      stroke(c, "border/subtle", 1);
+      mock.appendChild(c);
+      c.layoutSizingHorizontal = "FILL";
+      const l = figma.createText();
+      l.fontName = { family: "Inter", style: "Semi Bold" };
+      l.characters = label.toUpperCase();
+      l.fontSize = 11;
+      l.letterSpacing = { unit: "PERCENT", value: 8 };
+      l.fills = [paint("text/secondary")];
+      c.appendChild(l);
+      const v = figma.createText();
+      v.fontName = { family: "Inter", style: "Extra Bold" };
+      v.characters = value;
+      v.fontSize = 26;
+      v.fills = [tone ? paint(tone, ctx.prim) : paint("text/primary")];
+      c.appendChild(v);
+    }
+  }
+
+  /* ----------------------------------------------------------- Features */
+  {
+    const inner = band("Features", "bg/canvas", 80);
+    await sectionIntro(inner, "Features", "Everything the operation needs",
+      "One app for the cleaner in the field and the manager in the office.");
+
+    const FEATURES = [
+      ["Home", "Today's round, ready", "Cleaners open the app to today's list — grouped by community, with the villa, the car and the service already on it."],
+      ["Car", "Photos on every wash", "Before and after, taken on the phone, compressed and uploaded in seconds. Arguments end before they start."],
+      ["Clock", "Schedules that repeat themselves", "Set a subscription once — twice a week, every Tuesday, whatever they signed for — and the bookings generate ahead of time."],
+      ["Payments", "Money you can see", "The monthly amount per villa, what has been collected, what is overdue and by how many days."],
+      ["Card", "The office view", "Jobs today, jobs this week by community, and monthly revenue split by community and by cleaner."],
+      ["User", "Every cleaner, their own patch", "Assign communities to each cleaner and they see only their villas, their round and their payments."],
+    ];
+    let row = null;
+    for (let i = 0; i < FEATURES.length; i++) {
+      if (i % 3 === 0) {
+        row = H({ gap: 20 });
+        row.fills = [];
+        inner.appendChild(row);
+        row.layoutSizingHorizontal = "FILL";
+      }
+      await infoCard(row, FEATURES[i][0], FEATURES[i][1], FEATURES[i][2]);
+    }
+
+    const strip = H({ gap: 20 });
+    strip.fills = [];
+    inner.appendChild(strip);
+    strip.layoutSizingHorizontal = "FILL";
+    await infoCard(strip, "Mail", "Six languages, right-to-left included",
+      "English, हिन्दी, বাংলা, اردو, پنجابی and తెలుగు — your team uses the app in the language they think in.",
+      { darkChip: true });
+    await infoCard(strip, "Home", "Installs on any phone",
+      "Add to home screen on Android or iPhone. No app store, no downloads, no IT department.",
+      { darkChip: true });
+  }
+
+  /* ------------------------------------------------------- How it works */
+  {
+    const inner = band("How it works", "bg/surface", 80);
+    await sectionIntro(inner, "How it works", "Live by the end of the week",
+      "Four steps — and most of the typing isn't yours.");
+
+    const STEPS = [
+      ["1", "Map your patch", "Add the communities you cover and assign each cleaner to theirs. Ten minutes, once."],
+      ["2", "Invite the client", "Send the WhatsApp link. The owner fills in their villa, their cars and the days they want washed."],
+      ["3", "Let it schedule", "Bookings generate from each subscription and land on the right cleaner's day, week after week."],
+      ["4", "Wash, notify, collect", "Photos go up, the owner gets a WhatsApp, the payment gets marked — and the dashboard totals it all up."],
+    ];
+    const row = H({ gap: 20 });
+    row.fills = [];
+    inner.appendChild(row);
+    row.layoutSizingHorizontal = "FILL";
+    for (const [n, title, bodyText] of STEPS) {
+      await infoCard(row, null, title, bodyText, { number: n, bg: "bg/canvas" });
+    }
+  }
+
+  /* ---------------------------------------------------------------- CTA */
+  {
+    const inner = band("CTA", "bg/canvas", 84);
+    inner.counterAxisAlignItems = "CENTER";
+    inner.itemSpacing = 18;
+
+    const t = V({ gap: 12 });
+    t.fills = [];
+    t.primaryAxisSizingMode = "AUTO";
+    t.counterAxisSizingMode = "FIXED";
+    inner.appendChild(t);
+    t.resize(760, 10);
+    await heading(t, "See it on your own routes", 40, { align: "CENTER" });
+    await para(t, "Tell us the communities you cover and we'll set up a demo company with your villas, so you can try it with real names and real rounds.", 16.5, { align: "CENTER" });
+
+    const btn = H({ align: "CENTER", justify: "CENTER", px: 28, py: 15 });
+    radius(btn, "control");
+    fill(btn, "brand/primary");
+    if (ctx.es["shadow/brand-md"]) await btn.setEffectStyleIdAsync(ctx.es["shadow/brand-md"].id);
+    inner.appendChild(btn);
+    const bt2 = figma.createText();
+    bt2.fontName = { family: "Inter", style: "Bold" };
+    bt2.characters = "Book a demo";
+    bt2.fontSize = 15;
+    bt2.fills = [paint("brand/on-primary")];
+    btn.appendChild(bt2);
+  }
+
+  /* ------------------------------------------------------------- Footer */
+  const footer = H({ name: "Footer", justify: "SPACE_BETWEEN", align: "CENTER", px: 144, py: 30 });
   fill(footer, "text/primary");
   page.appendChild(footer);
   footer.layoutSizingHorizontal = "FILL";
-  await T(footer, "Carwaj", "Heading/H3", "text/inverse", { weight: "Extra Bold" });
-  await T(footer, "carwaj.app · hello@carwaj.app", "Caption", "text/secondary");
+  const fBrand = figma.createText();
+  fBrand.fontName = { family: "Inter", style: "Extra Bold" };
+  fBrand.characters = "Carwaj";
+  fBrand.fontSize = 18;
+  fBrand.fills = [paint("text/inverse")];
+  footer.appendChild(fBrand);
+  const fMeta = figma.createText();
+  fMeta.fontName = { family: "Inter", style: "Regular" };
+  fMeta.characters = "carwaj.app · hello@carwaj.app";
+  fMeta.fontSize = 13;
+  fMeta.fills = [paint("text/secondary")];
+  footer.appendChild(fMeta);
 
   // No node.screenshot() here — that is a convenience of the Figma MCP tool,
   // not the Plugin API, and calling it in a real plugin throws "not a function".
-  return "Landing page built at " + W + "px wide (nav, hero, 5 bands, CTA, footer).";
+  return "Landing page rebuilt at " + W + "px: nav, hero, WhatsApp, screens, admin, 6 features + 2 strip cards, 4 steps, CTA, footer.";
 }
 
 /* ------------------------------------------------------------------ run */
