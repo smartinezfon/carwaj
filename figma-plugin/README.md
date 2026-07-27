@@ -27,10 +27,13 @@ partial or failed run can just be repeated.
 | 4 | Admin — Overview, Employees, Villas, Payments, Communities |
 | 5 | Cleaner — Today, Calendar, Clients, Payments, Profile |
 | 6 | Password reset — Forgot password, Check your email, New password |
+| 7 | Missing app screens — Client setup (+ submitted), Booking detail, Add client, Add employee, Schedule, Add schedule, Add community |
+| 8 | Landing page — public marketing page at 1440px (not a device frame) |
 
-"Run everything" does all six in sequence.
+"Run everything" does all eight in sequence.
 
-Screens land on the **Screens** page at 375×812, laid out in rows by section.
+App screens land on the **Screens** page at 375×812, laid out in rows by section.
+The landing page sits below them at 1440px wide, since it is a desktop page rather than a device.
 
 ## What it depends on
 

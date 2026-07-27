@@ -1002,11 +1002,452 @@ async function step6() {
   return "Password reset: 3 screens built (request, sent, new password).";
 }
 
+/* ------------------------------------------------------- form helpers */
+
+async function formField(parent, label, value, opts) {
+  const o = opts || {};
+  const wrap = V({ gap: 6 });
+  wrap.fills = [];
+  parent.appendChild(wrap);
+  wrap.layoutSizingHorizontal = "FILL";
+  await T(wrap, label, "Label/Small", "text/muted", { weight: "Bold" });
+
+  const box = H({ align: "CENTER", px: 13 });
+  box.primaryAxisSizingMode = "FIXED";
+  box.counterAxisSizingMode = "FIXED";
+  box.resize(300, o.tall ? 76 : 46);
+  if (o.tall) { box.counterAxisAlignItems = "MIN"; box.paddingTop = 12; }
+  radius(box, "control");
+  fill(box, "bg/field");
+  stroke(box, "border/field", 1.5);
+  wrap.appendChild(box);
+  box.layoutSizingHorizontal = "FILL";
+  await T(box, value, "Body/Medium", o.filled ? "text/primary" : "text/secondary");
+  return wrap;
+}
+
+async function subHeader(parent, title) {
+  const h = V({ gap: 4, px: 16, py: 12 });
+  fill(h, "bg/surface");
+  parent.appendChild(h);
+  h.layoutSizingHorizontal = "FILL";
+  await T(h, "‹  Back", "Caption", "brand/primary", { weight: "Bold" });
+  await T(h, title, "Heading/H1", "text/primary", { weight: "Extra Bold" });
+  const line = figma.createRectangle();
+  line.resize(375, 1);
+  fill(line, "border/subtle");
+  parent.appendChild(line);
+  line.layoutSizingHorizontal = "FILL";
+}
+
+async function dayPicker(parent, activeDays) {
+  const row = H({ gap: 6 });
+  row.fills = [];
+  parent.appendChild(row);
+  const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
+  for (let i = 0; i < DAYS.length; i++) {
+    const on = activeDays.indexOf(i) >= 0;
+    const d = H({ align: "CENTER", justify: "CENTER" });
+    d.primaryAxisSizingMode = "FIXED";
+    d.counterAxisSizingMode = "FIXED";
+    d.resize(38, 38);
+    radius(d, "full");
+    fill(d, on ? "brand/primary" : "bg/surface");
+    if (!on) stroke(d, "border/field", 1);
+    row.appendChild(d);
+    await T(d, DAYS[i], "Label/Small", on ? "brand/on-primary" : "text/muted", { weight: "Bold" });
+  }
+}
+
+async function primaryButton(parent, label, tone) {
+  const btn = H({ align: "CENTER", justify: "CENTER", px: 20 });
+  btn.primaryAxisSizingMode = "FIXED";
+  btn.counterAxisSizingMode = "FIXED";
+  btn.resize(300, 48);
+  radius(btn, "control");
+  fill(btn, tone === "danger" ? "status/cancelled/dot" : "brand/primary");
+  parent.appendChild(btn);
+  btn.layoutSizingHorizontal = "FILL";
+  await T(btn, label, "Label/Medium", "brand/on-primary", { weight: "Semi Bold" });
+  return btn;
+}
+
+/* ------------------------------------------------------------- step 7 */
+// Screens that existed in the app but were never captured in Figma.
+
+async function step7() {
+  await figma.setCurrentPageAsync(ctx.screensPage);
+  clearScreens([
+    "Client setup", "Client setup done", "Booking detail",
+    "Add client", "Add employee", "Schedule", "Add schedule", "Add community",
+  ]);
+  const Y = 4500;
+
+  // ---- 1. Client setup (public, tokenised link) ----
+  {
+    const f = await screen("Client setup", "/onboarding/[token]", 0, Y);
+    const head = V({ gap: 4, px: 16, py: 14 });
+    fill(head, "bg/surface");
+    f.appendChild(head);
+    head.layoutSizingHorizontal = "FILL";
+    const brand = H({ gap: 8, align: "CENTER" });
+    brand.fills = [];
+    head.appendChild(brand);
+    const mark = H({ align: "CENTER", justify: "CENTER" });
+    mark.primaryAxisSizingMode = "FIXED";
+    mark.counterAxisSizingMode = "FIXED";
+    mark.resize(30, 30);
+    radius(mark, "md");
+    fill(mark, "brand/primary");
+    brand.appendChild(mark);
+    const ci = icon("Car", 18, "brand/on-primary");
+    if (ci) mark.appendChild(ci);
+    await T(brand, "Carwaj", "Heading/H2", "text/primary", { weight: "Extra Bold" });
+    await T(head, "Villa 214 · Al Barsha", "Body/Small", "text/secondary");
+
+    const b = body(f, 14);
+    await sectionTitle(b, "Your car(s)");
+    const carCard = await card(b, { gap: 10 });
+    await T(carCard, "Car 1", "Label/Small", "text/muted", { weight: "Bold" });
+    await formField(carCard, "Make", "Toyota", { filled: true });
+    await formField(carCard, "Model", "Camry", { filled: true });
+    const two = H({ gap: 8 });
+    two.fills = [];
+    carCard.appendChild(two);
+    two.layoutSizingHorizontal = "FILL";
+    await formField(two, "Colour", "White", { filled: true });
+    await formField(two, "Plate", "A 12345", { filled: true });
+
+    const addCar = H({ align: "CENTER", justify: "CENTER", px: 16, py: 12 });
+    radius(addCar, "control");
+    fill(addCar, "brand/tint");
+    b.appendChild(addCar);
+    addCar.layoutSizingHorizontal = "FILL";
+    await T(addCar, "+  Add another car", "Label/Medium", "brand/primary", { weight: "Semi Bold" });
+
+    await sectionTitle(b, "Preferred cleaning schedule");
+    const schedCard = await card(b, { gap: 10 });
+    await T(schedCard, "Which days?", "Caption", "text/secondary");
+    await dayPicker(schedCard, [1, 3, 5]);
+    await T(schedCard, "Preferred time window", "Caption", "text/secondary");
+    const times = H({ gap: 8, align: "CENTER" });
+    times.fills = [];
+    schedCard.appendChild(times);
+    times.layoutSizingHorizontal = "FILL";
+    await formField(times, "From", "07:00", { filled: true });
+    await formField(times, "To", "09:00", { filled: true });
+
+    await sectionTitle(b, "Anything else?");
+    await formField(b, "Notes", "Any special instructions for your cleaner…", { tall: true });
+    await primaryButton(b, "Submit details");
+  }
+
+  // ---- 2. Client setup — submitted ----
+  {
+    const f = await screen("Client setup done", "/onboarding/[token] · sent", 440, Y);
+    const b = V({ name: "Content", gap: 10, px: 32, align: "CENTER", justify: "CENTER" });
+    f.appendChild(b);
+    b.layoutSizingHorizontal = "FILL";
+    b.layoutSizingVertical = "FILL";
+
+    const ring = H({ align: "CENTER", justify: "CENTER" });
+    ring.primaryAxisSizingMode = "FIXED";
+    ring.counterAxisSizingMode = "FIXED";
+    ring.resize(80, 80);
+    radius(ring, "full");
+    fill(ring, "status/completed/bg");
+    b.appendChild(ring);
+    await T(ring, "✓", "Display", "status/completed/text", { weight: "Extra Bold" });
+    gap(b, 8);
+    await T(b, "Details received!", "Heading/H1", "text/primary",
+            { weight: "Extra Bold", align: "CENTER" });
+    await T(b, "Your cleaner will be in touch soon. You're all set.",
+            "Body/Small", "text/secondary", { align: "CENTER", fill: true });
+  }
+
+  // ---- 3. Booking detail ----
+  {
+    const f = await screen("Booking detail", "/cleaner/booking/[id]", 880, Y);
+    await appHeader(f, "Carwaj");
+    const b = body(f, 12);
+    await T(b, "‹  Today", "Caption", "brand/primary", { weight: "Bold" });
+
+    const top = H({ justify: "SPACE_BETWEEN", align: "CENTER" });
+    top.fills = [];
+    b.appendChild(top);
+    top.layoutSizingHorizontal = "FILL";
+    await T(top, "Villa 214", "Heading/H1", "text/primary", { weight: "Extra Bold" });
+    await statusBadge(top, "progress");
+
+    const info = await card(b, { gap: 4 });
+    await T(info, "Toyota Camry", "Heading/H3", "text/primary", { weight: "Bold" });
+    await T(info, "Plate: A 12345", "Caption", "text/secondary");
+    await T(info, "Owner: Mr Khalid", "Caption", "text/secondary");
+    await T(info, "Al Barsha · 07:00–09:00", "Caption", "text/secondary");
+
+    await sectionTitle(b, "After photo");
+    const photo = H({ align: "CENTER", justify: "CENTER" });
+    photo.primaryAxisSizingMode = "FIXED";
+    photo.counterAxisSizingMode = "FIXED";
+    photo.resize(300, 150);
+    radius(photo, "card");
+    fill(photo, "bg/subtle");
+    stroke(photo, "border/card", 1);
+    b.appendChild(photo);
+    photo.layoutSizingHorizontal = "FILL";
+    await T(photo, "No photo yet", "Body/Small", "text/secondary");
+
+    await primaryButton(b, "Take photo");
+    await primaryButton(b, "Mark completed");
+  }
+
+  // ---- 4. Add client ----
+  {
+    const f = await screen("Add client", "/cleaner/clients/new", 1320, Y);
+    await subHeader(f, "Add client");
+    const b = body(f, 14);
+    await formField(b, "Villa number", "214", { filled: true });
+    await formField(b, "Community", "Al Barsha", { filled: true });
+    await formField(b, "Owner name", "Mr Khalid", { filled: true });
+    await formField(b, "WhatsApp number", "+971 50 123 4567", { filled: true });
+    await formField(b, "Monthly amount (AED)", "450", { filled: true });
+    await primaryButton(b, "Add client");
+  }
+
+  // ---- 5. Add employee (current design — due to change in the onboarding rebuild) ----
+  {
+    const f = await screen("Add employee", "/admin/employees/new", 1760, Y);
+    await subHeader(f, "Add employee");
+    const b = body(f, 14);
+    await formField(b, "Name", "Ravi K", { filled: true });
+    await formField(b, "Email", "ravi@gulfshine.ae", { filled: true });
+    await formField(b, "Temporary password", "••••••••", { filled: true });
+    await formField(b, "WhatsApp number", "+971 50 987 6543", { filled: true });
+    await formField(b, "Role", "Cleaner", { filled: true });
+    await sectionTitle(b, "Communities");
+    const comms = await card(b, { gap: 8 });
+    await listRow(comms, "Al Barsha", null, "✓");
+    await listRow(comms, "JVC", null, "");
+    await primaryButton(b, "Add employee");
+  }
+
+  // ---- 6. Schedule ----
+  {
+    const f = await screen("Schedule", "/admin/schedule", 2200, Y);
+    await adminTopBar(f, "Admin");
+    const b = body(f);
+    const head = H({ justify: "SPACE_BETWEEN", align: "CENTER" });
+    head.fills = [];
+    b.appendChild(head);
+    head.layoutSizingHorizontal = "FILL";
+    await T(head, "Schedule", "Heading/H1", "text/primary", { weight: "Extra Bold" });
+    await pill(head, "+ New", "blue");
+    await T(b, "This week", "Caption", "text/secondary");
+    const rows = [
+      ["Villa 214 · Al Barsha", "Mon/Wed/Fri · 07:00", "Ravi K"],
+      ["Villa 17 · JVC", "Tue/Thu · 07:00", "Imran H"],
+      ["Villa 88 · Al Barsha", "Mon/Thu · 09:00", "Mo A"],
+      ["Villa 42 · Springs", "Wed/Sat · 08:00", "Ravi K"],
+    ];
+    const c = await card(b, { gap: 0 });
+    for (const [n, when, who] of rows) await listRow(c, n, when, who);
+  }
+
+  // ---- 7. Add schedule ----
+  {
+    const f = await screen("Add schedule", "/admin/schedule/new", 2640, Y);
+    await subHeader(f, "New schedule");
+    const b = body(f, 14);
+    await formField(b, "Villa", "Villa 214 · Al Barsha", { filled: true });
+    await formField(b, "Car", "Toyota Camry · A 12345", { filled: true });
+    await formField(b, "Cleaner", "Ravi K", { filled: true });
+    await sectionTitle(b, "Cleaning days");
+    await dayPicker(b, [1, 3, 5]);
+    const times = H({ gap: 8, align: "CENTER" });
+    times.fills = [];
+    b.appendChild(times);
+    times.layoutSizingHorizontal = "FILL";
+    await formField(times, "From", "07:00", { filled: true });
+    await formField(times, "To", "09:00", { filled: true });
+    await primaryButton(b, "Create schedule");
+  }
+
+  // ---- 8. Add community ----
+  {
+    const f = await screen("Add community", "/admin/communities/new", 3080, Y);
+    await subHeader(f, "New community");
+    const b = body(f, 14);
+    await formField(b, "Community name", "Al Barsha", { filled: true });
+    await T(b, "Villas are assigned to a community so the office can see revenue and coverage per area.",
+            "Caption", "text/secondary", { fill: true });
+    await primaryButton(b, "Create community");
+  }
+
+  return "Missing screens: 8 built (client setup + done, booking detail, add client, add employee, schedule, add schedule, add community).";
+}
+
+/* ------------------------------------------------------------- step 8 */
+// Public marketing landing page — desktop width, not a device frame.
+
+async function step8() {
+  await figma.setCurrentPageAsync(ctx.screensPage);
+  for (const node of ctx.screensPage.children.slice()) {
+    if (node.name.indexOf("Landing page") === 0) node.remove();
+  }
+
+  const W = 1440;
+  const page = figma.createFrame();
+  page.name = "Landing page  ·  /";
+  page.resize(W, 100);
+  page.x = 0; page.y = 5600;
+  page.layoutMode = "VERTICAL";
+  page.primaryAxisSizingMode = "AUTO";
+  page.counterAxisSizingMode = "FIXED";
+  page.itemSpacing = 0;
+  fill(page, "bg/canvas");
+  ctx.screensPage.appendChild(page);
+
+  async function band(name, bgToken, padY) {
+    const s = V({ name: name, gap: 18, align: "CENTER" });
+    s.paddingTop = padY; s.paddingBottom = padY;
+    s.paddingLeft = 220; s.paddingRight = 220;
+    fill(s, bgToken);
+    page.appendChild(s);
+    s.layoutSizingHorizontal = "FILL";
+    return s;
+  }
+  async function eyebrow(parent, text) {
+    return T(parent, text, "Micro/Upper", "brand/primary", { weight: "Semi Bold", align: "CENTER" });
+  }
+  async function bigTitle(parent, text) {
+    const t = await T(parent, text, "Display", "text/primary", { weight: "Extra Bold", align: "CENTER" });
+    t.fontSize = 44;
+    t.layoutSizingHorizontal = "FILL";
+    t.textAutoResize = "HEIGHT";
+    return t;
+  }
+  async function lede(parent, text) {
+    const t = await T(parent, text, "Body/Large", "text/muted", { align: "CENTER" });
+    t.layoutSizingHorizontal = "FILL";
+    t.textAutoResize = "HEIGHT";
+    return t;
+  }
+
+  // ---- Nav ----
+  const nav = H({ name: "Nav", justify: "SPACE_BETWEEN", align: "CENTER", px: 60, py: 18 });
+  fill(nav, "bg/surface");
+  page.appendChild(nav);
+  nav.layoutSizingHorizontal = "FILL";
+  const brand = H({ gap: 10, align: "CENTER" });
+  brand.fills = [];
+  nav.appendChild(brand);
+  const mark = H({ align: "CENTER", justify: "CENTER" });
+  mark.primaryAxisSizingMode = "FIXED";
+  mark.counterAxisSizingMode = "FIXED";
+  mark.resize(34, 34);
+  radius(mark, "md");
+  fill(mark, "brand/primary");
+  brand.appendChild(mark);
+  const navIcon = icon("Car", 20, "brand/on-primary");
+  if (navIcon) mark.appendChild(navIcon);
+  await T(brand, "Carwaj", "Heading/H2", "text/primary", { weight: "Extra Bold" });
+
+  const links = H({ gap: 28, align: "CENTER" });
+  links.fills = [];
+  nav.appendChild(links);
+  for (const l of ["WhatsApp", "Features", "How it works"]) {
+    await T(links, l, "Label/Medium", "text/muted", { weight: "Semi Bold" });
+  }
+  const signIn = H({ align: "CENTER", justify: "CENTER", px: 18, py: 9 });
+  radius(signIn, "control");
+  fill(signIn, "text/primary");
+  nav.appendChild(signIn);
+  await T(signIn, "Sign in", "Label/Medium", "text/inverse", { weight: "Semi Bold" });
+
+  // ---- Hero ----
+  const hero = await band("Hero", "bg/canvas", 80);
+  const badge = H({ gap: 7, align: "CENTER", px: 14, py: 7 });
+  radius(badge, "full");
+  fill(badge, "bg/surface");
+  stroke(badge, "border/subtle", 1);
+  hero.appendChild(badge);
+  const dot = figma.createEllipse();
+  dot.resize(7, 7);
+  fill(dot, "status/completed/dot");
+  badge.appendChild(dot);
+  await T(badge, "Built for car wash companies in the UAE", "Label/Small", "text/muted", { weight: "Bold" });
+
+  const heroTitle = await T(hero, "Run every wash without the spreadsheet.",
+    "Display", "text/primary", { weight: "Extra Bold", align: "CENTER" });
+  heroTitle.fontSize = 60;
+  heroTitle.layoutSizingHorizontal = "FILL";
+  heroTitle.textAutoResize = "HEIGHT";
+
+  await lede(hero, "Carwaj puts today's round in your cleaners' pockets, keeps your clients updated on WhatsApp, and shows the office what every villa is worth.");
+
+  const ctas = H({ gap: 12, align: "CENTER" });
+  ctas.fills = [];
+  hero.appendChild(ctas);
+  const demo = H({ align: "CENTER", justify: "CENTER", px: 26, py: 14 });
+  radius(demo, "control");
+  fill(demo, "brand/primary");
+  if (ctx.es["shadow/brand-md"]) await demo.setEffectStyleIdAsync(ctx.es["shadow/brand-md"].id);
+  ctas.appendChild(demo);
+  await T(demo, "Book a demo", "Label/Medium", "brand/on-primary", { weight: "Semi Bold" });
+  const secondary = H({ align: "CENTER", justify: "CENTER", px: 26, py: 14 });
+  radius(secondary, "control");
+  fill(secondary, "bg/surface");
+  stroke(secondary, "border/field", 1.5);
+  ctas.appendChild(secondary);
+  await T(secondary, "Sign in", "Label/Medium", "text/primary", { weight: "Semi Bold" });
+  await T(hero, "No card needed · Set up in an afternoon", "Caption", "text/secondary", { align: "CENTER" });
+
+  // ---- Content bands ----
+  const BANDS = [
+    ["WhatsApp", "bg/surface", "WhatsApp, built in", "Your clients never download anything",
+     "Every update reaches the owner where they already are. Five messages go out on their own, from your company's WhatsApp Business number."],
+    ["Screens", "bg/canvas", "The app", "Four screens, nothing to learn",
+     "The whole day fits under a cleaner's thumb. The whole month fits on one page."],
+    ["Admin", "bg/surface", "For the office", "The owner sees the whole company",
+     "Cleaners get a phone. Admins get a desktop dashboard — every community, every villa, every cleaner and every dirham, without ringing anyone to ask how the day went."],
+    ["Features", "bg/canvas", "Features", "Everything the operation needs", ""],
+    ["How it works", "bg/surface", "How it works", "Live by the end of the week", ""],
+  ];
+  for (const [name, bg, eb, title, sub] of BANDS) {
+    const s = await band(name, bg, 70);
+    await eyebrow(s, eb);
+    await bigTitle(s, title);
+    if (sub) await lede(s, sub);
+  }
+
+  // ---- CTA ----
+  const cta = await band("CTA", "bg/canvas", 70);
+  await bigTitle(cta, "See it on your own routes");
+  await lede(cta, "Tell us the communities you cover and we'll set up a demo company with your villas, so you can try it with real names and real rounds.");
+  const ctaBtn = H({ align: "CENTER", justify: "CENTER", px: 26, py: 14 });
+  radius(ctaBtn, "control");
+  fill(ctaBtn, "brand/primary");
+  if (ctx.es["shadow/brand-md"]) await ctaBtn.setEffectStyleIdAsync(ctx.es["shadow/brand-md"].id);
+  cta.appendChild(ctaBtn);
+  await T(ctaBtn, "Book a demo", "Label/Medium", "brand/on-primary", { weight: "Semi Bold" });
+
+  // ---- Footer ----
+  const footer = H({ name: "Footer", justify: "SPACE_BETWEEN", align: "CENTER", px: 60, py: 28 });
+  fill(footer, "text/primary");
+  page.appendChild(footer);
+  footer.layoutSizingHorizontal = "FILL";
+  await T(footer, "Carwaj", "Heading/H3", "text/inverse", { weight: "Extra Bold" });
+  await T(footer, "carwaj.app · hello@carwaj.app", "Caption", "text/secondary");
+
+  await page.screenshot();
+  return "Landing page built at " + W + "px wide (nav, hero, 5 bands, CTA, footer).";
+}
+
 /* ------------------------------------------------------------------ run */
 
-const STEPS = { s1: step1, s2: step2, s3: step3, s4: step4, s5: step5, s6: step6 };
+const STEPS = { s1: step1, s2: step2, s3: step3, s4: step4, s5: step5, s6: step6, s7: step7, s8: step8 };
 
-figma.showUI(__html__, { width: 320, height: 470 });
+figma.showUI(__html__, { width: 320, height: 530 });
 
 figma.ui.onmessage = async (msg) => {
   if (msg.type !== "run") return;
@@ -1014,7 +1455,9 @@ figma.ui.onmessage = async (msg) => {
     await boot();
     const results = [];
     const completed = [];
-    const order = msg.step === "all" ? ["s1", "s2", "s3", "s4", "s5", "s6"] : [msg.step];
+    const order = msg.step === "all"
+      ? ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"]
+      : [msg.step];
     for (const id of order) {
       results.push(await STEPS[id]());
       completed.push(id);
